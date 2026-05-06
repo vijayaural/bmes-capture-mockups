@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>BMES Capture App</title>
+<style>
+/* ============================================================
+   RESET & ROOT VARIABLES
+============================================================ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%;overflow:hidden}
+body{height:100%;font-family:-apple-system,'Segoe UI',Arial,sans-serif;color:#222;overflow:hidden;background:#e8eaed}
+:root{
+  --blue:#1565c0;--blue-lt:#e3f0ff;--blue-md:#90b4e8;
+  --orange:#ff9800;--green:#2e7d32;--green-lt:#e8f5e9;
+  --red:#c62828;--red-lt:#fde8e8;--amber:#b45309;--amber-lt:#fff8e1;
+  --border:#e0e0e0;--bg:#f2f4f7;
+}
+button{font-family:inherit;cursor:pointer;-webkit-appearance:none}
+input,select,textarea{font-family:inherit;-webkit-appearance:none}
+
+/* ============================================================
+   LAYOUT: PHONE vs IPAD via body class
+============================================================ */
+.lay-ph{display:none}
+.lay-ip{display:none}
+/* Automatic on mobile without JS mode class */
+@media(max-width:767px){
+  .lay-ph{display:flex}
+  .lay-ip{display:none}
+}
+@media(min-width:768px) and (max-width:1099px){
+  .lay-ph{display:none}
+  .lay-ip{display:flex}
+}
+/* JS overrides (desktop toggle) — always win */
+body.m-phone .lay-ph{display:flex!important}
+body.m-phone .lay-ip{display:none!important}
+body.m-ipad  .lay-ph{display:none!important}
+body.m-ipad  .lay-ip{display:flex!important}
+
+/* ============================================================
+   DESKTOP PRESENTATION (≥ 1100px)
+============================================================ */
+@media(min-width:1100px){
+  html,body{height:auto;overflow:auto}
+  body{display:flex;flex-direction:column;align-items:center;padding:22px 20px 40px}
+
+  #proto-bar{
+    display:flex;align-items:center;gap:14px;flex-shrink:0;
+    background:white;border-radius:10px;padding:8px 18px;margin-bottom:18px;
+    box-shadow:0 2px 10px rgba(0,0,0,.1);
+  }
+  .proto-title{font-size:13px;font-weight:700;color:var(--blue)}
+  .proto-sep{color:#ddd;font-size:14px}
+  .proto-label{font-size:11px;color:#888;font-weight:600}
+  .proto-toggle{display:flex;gap:4px}
+  .proto-btn{
+    background:var(--blue-lt);border:1.5px solid var(--blue-md);
+    color:var(--blue);border-radius:6px;padding:5px 14px;
+    font-size:11px;font-weight:700;transition:all .15s;
+  }
+  .proto-btn.active{background:var(--blue);color:white;border-color:var(--blue)}
+
+  #app-frame{position:relative;flex-shrink:0;overflow:hidden}
+
+  /* — Phone frame — */
+  #app-frame.f-phone{
+    width:360px;border-radius:40px;
+    border:8px solid #1a1a1a;outline:1.5px solid #2a2a2a;
+    background:#1a1a1a;
+    box-shadow:0 24px 64px rgba(0,0,0,.35),inset 0 0 0 1px #333;
+  }
+  #app-frame.f-phone .frame-notch{
+    background:#1a1a1a;height:26px;
+    display:flex;justify-content:center;align-items:flex-end;padding-bottom:4px;
+  }
+  #app-frame.f-phone .frame-notch .pill{background:#333;width:90px;height:16px;border-radius:8px}
+  #app-frame.f-phone .frame-homebar{
+    background:#1a1a1a;height:20px;
+    display:flex;justify-content:center;align-items:center;
+  }
+  #app-frame.f-phone .frame-homebar .pill{background:#555;width:100px;height:5px;border-radius:3px}
+  #app-frame.f-phone #app{width:344px;height:694px}
+
+  /* — iPad frame — */
+  #app-frame.f-ipad{
+    width:840px;border-radius:20px;
+    border:10px solid #1a1a1a;outline:1.5px solid #2a2a2a;
+    background:#1a1a1a;
+    box-shadow:0 24px 64px rgba(0,0,0,.35),inset 0 0 0 1px #333;
+  }
+  #app-frame.f-ipad .frame-notch{
+    background:#1a1a1a;height:18px;
+    display:flex;justify-content:center;align-items:center;
+  }
+  #app-frame.f-ipad .frame-notch .pill{background:#333;width:70px;height:9px;border-radius:5px}
+  #app-frame.f-ipad .frame-homebar{
+    background:#1a1a1a;height:18px;
+    display:flex;justify-content:center;align-items:center;
+  }
+  #app-frame.f-ipad .frame-homebar .pill{background:#555;width:80px;height:5px;border-radius:3px}
+  #app-frame.f-ipad #app{width:820px;height:600px}
+}
+
+/* ============================================================
+   MOBILE: FULL SCREEN
+============================================================ */
+@media(max-width:1099px){
+  #proto-bar{display:none!important}
+  #app-frame{width:100%;height:100%;display:flex;flex-direction:column}
+  .frame-notch,.frame-homebar{display:none!important}
+  #app{flex:1}
+}
+
+/* ============================================================
+   APP CONTAINER
+============================================================ */
+#app{
+  background:var(--bg);display:flex;flex-direction:column;
+  overflow:hidden;position:relative;
+}
+
+/* ============================================================
+   SCREEN VISIBILITY
+============================================================ */
+.screen{display:none;flex-direction:column;width:100%;height:100%;overflow:hidden;flex:1}
+.screen.active{display:flex}
+
+/* ============================================================
+   COMMON: APP HEADER (blue)
+============================================================ */
+.app-hdr{background:var(--blue);padding:10px 14px 8px;flex-shrink:0}
+.app-hdr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.app-hdr-top.nomg{margin-bottom:0}
+.user-chip{background:rgba(255,255,255,.18);border-radius:12px;padding:2px 9px;font-size:10px;color:white}
+.so-card{background:rgba(255,255,255,.13);border-radius:7px;padding:7px 10px}
+.so-num{font-size:13px;font-weight:700;color:white}
+.so-cust{font-size:10px;color:rgba(255,255,255,.8);margin-top:1px}
+.so-meta{display:flex;gap:10px;margin-top:4px}
+.so-meta-item{font-size:9.5px;color:rgba(255,255,255,.72);display:flex;align-items:center;gap:3px}
+.so-dot-live{width:6px;height:6px;border-radius:50%;background:#4fc3f7;display:inline-block}
+
+/* ============================================================
+   COMMON: BOTTOM NAV
+============================================================ */
+.bnav{background:white;border-top:1px solid var(--border);display:flex;padding:5px 0 3px;flex-shrink:0}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:2px 0}
+.bnav-ico{font-size:18px;color:#bbb}
+.bnav-lbl{font-size:9px;color:#bbb;font-weight:500}
+.bnav-item.on .bnav-ico,.bnav-item.on .bnav-lbl{color:var(--blue)}
+
+/* ============================================================
+   COMMON: STAGE TABS (phone)
+============================================================ */
+.stage-tabs{background:white;border-bottom:1px solid var(--border);display:flex;box-shadow:0 1px 3px rgba(0,0,0,.06);flex-shrink:0}
+.stab{flex:1;padding:8px 3px;text-align:center;border-bottom:3px solid transparent;cursor:pointer}
+.stab-lbl{font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.03em}
+.stab-cnt{font-size:9px;color:#bbb;margin-top:1px}
+.stab.on{border-bottom-color:var(--blue)}.stab.on .stab-lbl,.stab.on .stab-cnt{color:var(--blue)}
+.stab.done .stab-lbl,.stab.done .stab-cnt{color:var(--green)}
+
+/* ============================================================
+   COMMON: BUTTONS
+============================================================ */
+.btn-pri{width:100%;background:var(--blue);color:white;border:none;border-radius:10px;padding:13px 0;font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px;box-shadow:0 3px 10px rgba(21,101,192,.3);margin-bottom:7px}
+.btn-pri:active{opacity:.85}
+.btn-sec{width:100%;background:white;color:var(--blue);border:1.5px solid var(--blue);border-radius:10px;padding:10px 0;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:7px}
+.btn-sec:active{background:var(--blue-lt)}
+.btn-scan{width:100%;background:#f0f4ff;color:var(--blue);border:1.5px solid var(--blue-md);border-radius:10px;padding:10px 0;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-green{width:100%;background:var(--green);color:white;border:none;border-radius:10px;padding:13px 0;font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px;box-shadow:0 3px 10px rgba(46,125,50,.3);margin-bottom:7px}
+.btn-del{flex:1;background:var(--red);color:white;border:none;border-radius:8px;padding:11px 0;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:5px}
+.btn-ret{flex:1;background:#e65100;color:white;border:none;border-radius:8px;padding:11px 0;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:5px;margin-left:7px}
+
+/* ============================================================
+   COMMON: CONTENT AREA & CARDS
+============================================================ */
+.app-content{padding:11px 12px 16px;overflow-y:auto;flex:1}
+.sec-title{font-size:9.5px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.stage-card{background:white;border-radius:8px;padding:10px 11px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.07)}
+.stage-card-title{font-size:12px;font-weight:700;color:#222;display:flex;align-items:center;gap:6px;margin-bottom:3px}
+.stage-card-sub{font-size:10px;color:#777;line-height:1.4}
+.sdot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.empty-state{background:#f8f9fa;border:1.5px dashed #ccc;border-radius:8px;padding:18px;text-align:center;margin-bottom:10px}
+.empty-ico{font-size:26px;margin-bottom:5px}
+.empty-txt{font-size:10.5px;color:#999;line-height:1.4}
+
+/* Queue items */
+.q-item{background:white;border-radius:8px;padding:10px 11px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,.07);display:flex;align-items:center;gap:10px;cursor:pointer}
+.q-item:active,.q-item.sel{background:#e8f0fe}
+.q-item.sel{border:1.5px solid var(--blue-md)}
+.q-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.q-info{flex:1}
+.q-so{font-size:12px;font-weight:700;color:#222}
+.q-cust{font-size:10px;color:#777;margin-top:1px}
+.q-chips{display:flex;gap:4px;margin-top:4px}
+.chip{font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px;border:1px solid;display:inline-block}
+.chip-done{color:var(--green);background:var(--green-lt);border-color:#a5d6a7}
+.chip-pend{color:var(--amber);background:var(--amber-lt);border-color:#ffe082}
+.q-arr{color:#bbb;font-size:14px}
+
+/* Photo thumbnails */
+.thumb-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.thumb{width:68px;height:68px;border-radius:7px;overflow:hidden;position:relative;box-shadow:0 1px 3px rgba(0,0,0,.15);cursor:pointer}
+.thumb-bg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:22px}
+.thumb-lbl{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.5);color:white;font-size:8.5px;text-align:center;padding:2px;font-weight:700}
+.thumb-x{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.55);color:white;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;cursor:pointer;z-index:2}
+.thumb-add{width:68px;height:68px;border-radius:7px;background:#f0f0f0;border:2px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:20px;color:#bbb;cursor:pointer}
+
+/* Sync banner */
+.sync-ok{display:flex;align-items:center;gap:5px;background:var(--green-lt);border-radius:6px;padding:6px 9px;margin-bottom:8px;font-size:10px;color:var(--green);font-weight:600;animation:fadeDown .35s ease}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ============================================================
+   SCREEN: LOGIN
+============================================================ */
+#screen-login{background:white}
+.login-ph{flex-direction:column;flex:1;overflow-y:auto;padding:26px 20px;background:white}
+.login-logo{text-align:center;margin-bottom:22px}
+.login-title{font-size:15px;font-weight:700;color:#222;margin-bottom:4px;text-align:center}
+.login-sub{font-size:10.5px;color:#777;margin-bottom:18px;text-align:center}
+.lf{margin-bottom:10px}
+.lf label{font-size:10px;color:#666;font-weight:600;display:block;margin-bottom:3px}
+.lf input{width:100%;border:1px solid #ccc;border-radius:6px;padding:9px 10px;font-size:11.5px;color:#333;outline:none}
+.lf input:focus{border-color:var(--blue)}
+.login-btn{width:100%;background:var(--blue);color:white;border:none;border-radius:8px;padding:13px;font-size:13px;font-weight:700;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:8px}
+.login-btn:active{opacity:.85}
+.login-note{font-size:9.5px;color:#999;text-align:center;margin-top:12px;line-height:1.5}
+.login-err{font-size:10.5px;color:var(--red);text-align:center;margin-top:8px;display:none}
+
+.login-ip{flex:1;align-items:center;justify-content:center;background:white}
+.ipad-login-card{width:400px;text-align:center}
+.ilf{margin-bottom:12px;text-align:left}
+.ilf label{font-size:11px;color:#666;font-weight:600;display:block;margin-bottom:4px}
+.ilf input{width:100%;border:1px solid #ccc;border-radius:6px;padding:10px 12px;font-size:12.5px;color:#333;outline:none}
+.ilf input:focus{border-color:var(--blue)}
+.ipad-login-btn{width:100%;background:var(--blue);color:white;border:none;border-radius:8px;padding:14px;font-size:13px;font-weight:700;margin-top:8px}
+
+/* ============================================================
+   SCREEN: QR SCANNER
+============================================================ */
+#screen-qr{background:#111;flex-direction:column}
+.qr-hdr{background:rgba(0,0,0,.7);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.qr-cancel{color:#90caf9;font-size:11px;font-weight:600;cursor:pointer}
+.qr-hint{color:rgba(255,255,255,.6);font-size:11px;text-align:center;padding:12px 20px 4px;flex-shrink:0}
+.qr-vf{flex:1;display:flex;align-items:center;justify-content:center}
+.qr-frame{width:190px;height:190px;position:relative}
+.qr-corner{position:absolute;width:26px;height:26px;border-color:#4fc3f7;border-style:solid}
+.qr-corner.tl{top:0;left:0;border-width:3px 0 0 3px;border-radius:4px 0 0 0}
+.qr-corner.tr{top:0;right:0;border-width:3px 3px 0 0;border-radius:0 4px 0 0}
+.qr-corner.bl{bottom:0;left:0;border-width:0 0 3px 3px;border-radius:0 0 0 4px}
+.qr-corner.br{bottom:0;right:0;border-width:0 3px 3px 0;border-radius:0 0 4px 0}
+.qr-scan-line{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#4fc3f7,transparent);animation:scanMove 2s linear infinite}
+@keyframes scanMove{0%{top:5%}100%{top:92%}}
+.qr-inst{color:rgba(255,255,255,.7);font-size:11px;text-align:center;padding:0 24px 28px;line-height:1.5;flex-shrink:0}
+#qr-badge{
+  display:none;position:absolute;bottom:90px;left:50%;transform:translateX(-50%);
+  background:rgba(79,195,247,.15);border:1.5px solid #4fc3f7;color:#4fc3f7;
+  font-size:11px;font-weight:700;padding:5px 18px;border-radius:20px;
+  animation:pulse 1s ease infinite;white-space:nowrap;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ============================================================
+   SCREEN: CAMERA (phone — full screen)
+============================================================ */
+#screen-camera{background:#000;flex-direction:column}
+.cam-hdr{background:rgba(0,0,0,.6);padding:8px 14px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.cam-badge{color:white;font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px}
+.cam-so{color:rgba(255,255,255,.7);font-size:10px}
+.cam-num{color:rgba(255,255,255,.5);font-size:10px}
+.cam-vf{flex:1;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;align-items:center;justify-content:center;position:relative}
+.cam-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.05)1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05)1px,transparent 1px);background-size:33.3% 33.3%}
+.cam-sil{font-size:64px;opacity:.28}
+.cam-flash{position:absolute;inset:0;background:white;opacity:0;pointer-events:none;transition:opacity .12s}
+.cam-flash.on{opacity:.85}
+.cam-infobar{background:rgba(0,0,0,.7);padding:5px 14px;display:flex;justify-content:space-between;flex-shrink:0}
+.cam-info-lbl{color:rgba(255,255,255,.5);font-size:9.5px}
+.cam-res{color:#4fc3f7;font-size:9.5px}
+.cam-ctrls{background:rgba(0,0,0,.85);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.cam-cancel{color:white;font-size:11px;font-weight:600;cursor:pointer;min-width:50px}
+.shutter{width:62px;height:62px;border-radius:50%;background:white;border:4px solid rgba(255,255,255,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px rgba(255,255,255,.2)}
+.shutter-inner{width:50px;height:50px;border-radius:50%;background:white}
+.cam-flip{color:white;font-size:22px;cursor:pointer;min-width:50px;text-align:right}
+
+/* ============================================================
+   SCREEN: PHOTO DETAIL
+============================================================ */
+#screen-pd{background:#111;flex-direction:column}
+.pd-hdr{background:rgba(0,0,0,.8);padding:8px 14px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.pd-back{color:#90caf9;font-size:11px;font-weight:600;cursor:pointer}
+.pd-ttl{color:white;font-size:12px;font-weight:700}
+.pd-img{height:200px;display:flex;align-items:center;justify-content:center;font-size:64px;flex-shrink:0}
+.pd-meta{background:white;padding:12px 14px;flex:1;overflow-y:auto}
+.meta-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f0f0;font-size:11px}
+.meta-row:last-of-type{border-bottom:none}
+.meta-lbl{color:#888}
+.meta-val{color:#333;font-weight:600;text-align:right;max-width:60%}
+.notes-lbl{font-size:10px;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;margin-top:8px}
+.notes-ta{width:100%;border:1px solid #ddd;border-radius:6px;padding:7px 9px;font-size:11px;color:#333;resize:none;height:50px;font-family:inherit}
+.notes-hint{font-size:9.5px;color:#bbb;margin-top:3px}
+.pd-acts{background:white;padding:10px 14px;border-top:1px solid #eee;display:flex;flex-shrink:0}
+
+/* ============================================================
+   SCREEN: SEARCH
+============================================================ */
+.srch-hdr{background:var(--blue);padding:10px 14px 12px;flex-shrink:0}
+.srch-ttl{font-size:13px;font-weight:700;color:white;margin-bottom:8px}
+.srch-bar{display:flex;align-items:center;background:white;border-radius:8px;padding:6px 10px;gap:6px}
+.srch-bar input{flex:1;border:none;outline:none;font-size:12px;color:#333;background:transparent}
+.srch-ico{color:#999;font-size:15px}
+.srch-body{padding:12px;overflow-y:auto;flex:1}
+
+/* ============================================================
+   SCREEN: PROFILE
+============================================================ */
+.prof-hdr{background:var(--blue);padding:16px 14px 14px;flex-shrink:0}
+.prof-avatar{width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:8px}
+.prof-name{font-size:15px;font-weight:700;color:white}
+.prof-role{font-size:10.5px;color:rgba(255,255,255,.75);margin-top:2px}
+.prof-body{padding:12px;overflow-y:auto;flex:1}
+.prof-sec{margin-bottom:14px}
+.prof-sec-ttl{font-size:10px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;padding:0 2px}
+.prof-card{background:white;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.07)}
+.prof-row{display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid #f0f0f0;cursor:pointer}
+.prof-row:last-child{border-bottom:none}
+.prof-row:active{background:#f5f9ff}
+.prof-ico{font-size:18px;width:28px;flex-shrink:0}
+.prof-info{flex:1}
+.prof-lbl{font-size:12px;font-weight:600;color:#222}
+.prof-desc{font-size:10px;color:#888;margin-top:1px}
+.prof-chev{color:#bbb;font-size:14px}
+.prof-badge{font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-lt);padding:2px 8px;border-radius:8px}
+.prof-ver{text-align:center;font-size:10px;color:#bbb;margin-top:14px}
+
+/* ============================================================
+   SCREEN: SETUP
+============================================================ */
+.setup-hdr{background:var(--blue);padding:10px 14px 8px;flex-shrink:0}
+.setup-hdr-row{display:flex;justify-content:space-between;align-items:center}
+.setup-back{color:rgba(255,255,255,.85);font-size:11px;font-weight:600;cursor:pointer}
+.setup-hdr-ttl{font-size:13px;font-weight:700;color:white}
+.setup-save{background:rgba(255,255,255,.2);color:white;border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:700}
+.setup-body{padding:12px;overflow-y:auto;flex:1}
+.setup-sec{margin-bottom:14px}
+.setup-sec-hdr{display:flex;align-items:center;gap:6px;margin-bottom:6px;padding:0 2px}
+.setup-sec-ttl{font-size:10px;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:.08em;flex:1}
+.setup-sec-ttl.danger{color:var(--red)}
+.admin-badge{font-size:9px;font-weight:700;color:var(--amber);background:var(--amber-lt);border:1px solid #ffe082;border-radius:8px;padding:1px 7px;flex-shrink:0}
+.setup-card{background:white;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.07)}
+.srow{display:flex;align-items:center;padding:10px 12px;border-bottom:1px solid #f0f0f0;gap:10px}
+.srow:last-child{border-bottom:none}
+.srow-ico{font-size:16px;flex-shrink:0;width:24px;text-align:center}
+.srow-info{flex:1;min-width:0}
+.srow-lbl{font-size:12px;font-weight:600;color:#222}
+.srow-desc{font-size:10px;color:#999;margin-top:1px;line-height:1.4}
+.srow-ctrl{flex-shrink:0}
+.s-input{border:1px solid #ddd;border-radius:6px;padding:5px 8px;font-size:11px;color:#333;width:140px;background:#fafafa}
+.s-select{border:1px solid #ddd;border-radius:6px;padding:5px 8px;font-size:11px;color:#333;background:#fafafa;cursor:pointer}
+.s-slider{width:100px;accent-color:var(--blue)}
+.val-chip{font-size:11px;font-weight:700;color:var(--blue);background:var(--blue-lt);border-radius:8px;padding:2px 8px;min-width:44px;text-align:center}
+.row-act{font-size:11px;font-weight:600;color:var(--blue);background:var(--blue-lt);border:none;border-radius:6px;padding:5px 10px;cursor:pointer}
+.row-act.danger{color:var(--red);background:var(--red-lt)}
+/* Logo upload */
+.logo-area{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid #f0f0f0}
+.logo-prev{width:80px;height:32px;border:1px solid var(--border);border-radius:6px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+.logo-info{flex:1}
+.logo-lbl{font-size:12px;font-weight:600;color:#222}
+.logo-desc{font-size:10px;color:#999;margin-top:1px}
+.logo-btn{font-size:11px;font-weight:600;color:var(--blue);background:var(--blue-lt);border:none;border-radius:6px;padding:5px 10px;cursor:pointer}
+/* Stage config */
+.stage-cfg-row{display:flex;align-items:center;padding:8px 12px;border-bottom:1px solid #f0f0f0;gap:8px}
+.stage-cfg-row:last-child{border-bottom:none}
+.scol-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.scol-input{flex:1;border:1px solid #ddd;border-radius:5px;padding:4px 7px;font-size:11.5px;color:#333;font-family:inherit}
+.s-remove{color:#ccc;font-size:14px;cursor:pointer}
+.add-stage{display:flex;align-items:center;gap:6px;padding:8px 12px;color:var(--blue);font-size:11.5px;font-weight:600;cursor:pointer;background:#f5f9ff;border-top:1px dashed #c5d9f0;border-radius:0 0 10px 10px}
+/* Toggle */
+.tog{width:40px;height:22px;border-radius:11px;position:relative;cursor:pointer;flex-shrink:0;transition:background .2s}
+.tog.on{background:var(--blue)}.tog.off{background:#ccc}
+.tog-k{position:absolute;top:3px;width:16px;height:16px;border-radius:50%;background:white;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .2s}
+.tog.on .tog-k{left:21px}.tog.off .tog-k{left:3px}
+/* iPad two-col setup */
+.setup-2col{display:grid;grid-template-columns:1fr 1fr;flex:1;overflow-y:auto}
+.setup-col{padding:14px;border-right:1px solid #e8e8e8}
+.setup-col:last-child{border-right:none}
+
+/* ============================================================
+   IPAD: HEADER
+============================================================ */
+.ipad-hdr{background:var(--blue);padding:10px 20px 8px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.ipad-hdr-l{display:flex;align-items:center;gap:16px}
+.ipad-so-info{color:white}
+.ipad-so-num{font-size:14px;font-weight:700}
+.ipad-so-cust{font-size:11px;color:rgba(255,255,255,.8)}
+.ipad-so-status{display:inline-block;background:rgba(255,255,255,.18);border-radius:10px;padding:2px 10px;font-size:10px;color:white;margin-top:3px}
+.ipad-hdr-r{display:flex;align-items:center;gap:12px}
+.ipad-hdr-btn{background:rgba(255,255,255,.15);color:white;border-radius:8px;padding:5px 12px;font-size:11px;cursor:pointer;border:none}
+.ipad-uc{background:rgba(255,255,255,.18);border-radius:12px;padding:3px 10px;font-size:11px;color:white}
+
+/* IPAD: STAGE TABS */
+.ipad-stabs{background:white;border-bottom:1px solid var(--border);display:flex;padding:0 20px;box-shadow:0 1px 3px rgba(0,0,0,.06);flex-shrink:0;align-items:center}
+.istab{padding:10px 24px;border-bottom:3px solid transparent;cursor:pointer;display:flex;align-items:center;gap:8px}
+.istab-lbl{font-size:12px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.04em}
+.istab-cnt{font-size:11px;color:#bbb}
+.istab.on{border-bottom-color:var(--blue)}.istab.on .istab-lbl,.istab.on .istab-cnt{color:var(--blue)}
+.istab.done .istab-lbl,.istab.done .istab-cnt{color:var(--green)}
+.istab-back{margin-left:auto;background:var(--blue-lt);color:var(--blue);border-radius:6px;padding:4px 12px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
+
+/* IPAD: TWO-COLUMN BODY */
+.ipad-body{display:grid;grid-template-columns:300px 1fr;flex:1;overflow:hidden}
+.ipad-left{border-right:1px solid var(--border);padding:14px;background:#f8f9fa;overflow-y:auto;display:flex;flex-direction:column}
+.panel-ttl{font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+.ipad-right{display:flex;flex-direction:column;background:#111;position:relative;overflow:hidden}
+
+/* IPAD: THUMBNAILS */
+.ip-thumb-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.ip-thumb{width:72px;height:72px;border-radius:8px;overflow:hidden;position:relative;box-shadow:0 1px 3px rgba(0,0,0,.15);cursor:pointer}
+.ip-thumb-bg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:22px}
+.ip-thumb-lbl{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.5);color:white;font-size:9px;text-align:center;padding:2px;font-weight:700}
+.ip-thumb-x{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.5);color:white;border-radius:50%;width:16px;height:16px;display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer}
+.ip-thumb-add{width:72px;height:72px;border-radius:8px;background:#f0f0f0;border:2px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:22px;color:#bbb;cursor:pointer}
+
+/* IPAD: CAMERA AREA */
+.ipad-cam-area{flex:1;background:linear-gradient(135deg,#1a1a2e,#16213e,#0f3460);display:flex;align-items:center;justify-content:center;position:relative}
+.ipad-grid-lines{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04)1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04)1px,transparent 1px);background-size:33.3% 33.3%}
+.ipad-sil{font-size:80px;opacity:.22}
+.ipad-stage-overlay{position:absolute;top:16px;left:0;right:0;display:flex;justify-content:center}
+.ipad-stage-badge{background:rgba(0,0,0,.6);font-size:11px;font-weight:700;padding:4px 16px;border-radius:20px;letter-spacing:.08em;border:1.5px solid}
+.ipad-flash{position:absolute;inset:0;background:white;opacity:0;pointer-events:none;transition:opacity .12s}
+.ipad-flash.on{opacity:.85}
+.ipad-cam-ctrls{background:rgba(0,0,0,.85);padding:16px 30px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.ipad-cam-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:white;padding:10px 18px;border-radius:8px;font-size:11.5px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px}
+.ipad-shutter{width:72px;height:72px;border-radius:50%;background:white;border:5px solid rgba(255,255,255,.3);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px rgba(255,255,255,.15)}
+.ipad-shutter-inner{width:58px;height:58px;border-radius:50%;background:white}
+
+/* IPAD: QUEUE LAYOUT */
+.ipad-q-body{display:grid;grid-template-columns:1fr 1fr;flex:1;overflow:hidden}
+.ipad-q-left{padding:14px 16px;border-right:1px solid var(--border);background:#f8f9fa;overflow-y:auto}
+.ipad-q-right{padding:14px 16px;background:white;overflow-y:auto}
+
+/* IPAD AUDIT CARD */
+.audit-card{background:white;border-radius:8px;padding:9px 11px;box-shadow:0 1px 3px rgba(0,0,0,.07);margin-bottom:10px}
+.audit-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0f0f0;font-size:10px}
+.audit-row:last-child{border-bottom:none}
+.audit-lbl{color:#888}
+.audit-val{color:#333;font-weight:600}
+
+/* IPAD STAGE DETAIL CARD */
+.sdc{background:white;border-radius:8px;padding:12px 14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.07)}
+.sdc-ttl{font-size:13px;font-weight:700;color:#222;display:flex;align-items:center;gap:7px;margin-bottom:4px}
+.sdc-desc{font-size:11px;color:#777;line-height:1.5}
+.sdc-stat{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;margin-top:6px}
+
+/* IPAD PHOTO DETAIL OVERLAY */
+#ipad-pd-overlay{position:absolute;inset:0;background:#111;z-index:20;display:none;flex-direction:column}
+#ipad-pd-overlay.on{display:flex}
+
+/* IPAD SYNC BANNER */
+.ipad-sync-ok{display:flex;align-items:center;gap:5px;background:var(--green-lt);border-radius:6px;padding:5px 9px;margin-bottom:8px;font-size:10px;color:var(--green);font-weight:600;animation:fadeDown .35s ease}
+
+/* ============================================================
+   MODAL
+============================================================ */
+#modal-overlay{
+  display:none;position:absolute;inset:0;background:rgba(0,0,0,.55);
+  z-index:100;align-items:flex-end;justify-content:center;padding-bottom:20px;
+}
+#modal-overlay.on{display:flex}
+.modal-sheet{background:white;border-radius:16px;padding:20px;width:100%;max-width:340px;margin:0 12px}
+.modal-ico{font-size:28px;text-align:center;margin-bottom:8px}
+.modal-ttl{font-size:14px;font-weight:700;color:#222;text-align:center;margin-bottom:6px}
+.modal-msg{font-size:11.5px;color:#555;text-align:center;line-height:1.5;margin-bottom:16px}
+.modal-btns{display:flex;gap:8px}
+.modal-cancel{flex:1;background:#f0f0f0;color:#444;border:none;border-radius:8px;padding:11px;font-size:12px;font-weight:600}
+.modal-confirm{flex:1;border:none;border-radius:8px;padding:11px;font-size:12px;font-weight:700}
+.modal-confirm.red{background:var(--red);color:white}
+.modal-confirm.orange{background:#e65100;color:white}
+.modal-confirm.blue{background:var(--blue);color:white}
+
+/* ============================================================
+   TOAST
+============================================================ */
+#toast{
+  position:absolute;top:64px;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,.78);color:white;font-size:11px;font-weight:600;
+  padding:7px 16px;border-radius:20px;z-index:200;
+  opacity:0;pointer-events:none;transition:opacity .25s;white-space:nowrap;
+}
+#toast.on{opacity:1}
+
+/* ============================================================
+   ACUMATICA REFERENCE SCREEN
+============================================================ */
+.acref-hdr{background:var(--blue);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.acref-back{color:rgba(255,255,255,.85);font-size:11px;font-weight:600;cursor:pointer}
+.acref-ttl{font-size:12px;font-weight:700;color:white}
+.acref-body{flex:1;overflow:auto;background:white}
+</style>
+</head>
+<body>
+
+<!-- DESKTOP PRESENTATION BAR -->
+<div id="proto-bar">
+  <span class="proto-title">BMES Capture App — Interactive Prototype</span>
+  <span class="proto-sep">|</span>
+  <span class="proto-label">Layout:</span>
+  <div class="proto-toggle">
+    <button class="proto-btn active" id="btn-phone" onclick="setMode('phone')">📱 Phone</button>
+    <button class="proto-btn" id="btn-ipad" onclick="setMode('ipad')">📟 iPad</button>
+  </div>
+  <span class="proto-sep">|</span>
+  <span class="proto-label" style="font-size:10px;color:#aaa;">Tap any button to navigate all flows</span>
+</div>
+
+<!-- DEVICE FRAME -->
+<div id="app-frame" class="f-phone">
+<div class="frame-notch"><div class="pill"></div></div>
+
+<!-- THE APP -->
+<div id="app">
+
+<!-- ╔══════════════════════════════╗
+     ║  SCREEN: LOGIN               ║
+     ╚══════════════════════════════╝ -->
+<div id="screen-login" class="screen active">
+  <!-- Phone -->
+  <div class="lay-ph login-ph">
+    <div class="login-logo">
+      <svg width="160" height="52" viewBox="0 0 200 65" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="44" height="44" rx="8" fill="none" stroke="#1565c0" stroke-width="3.5"/>
+        <polyline points="6,24 13,24 17,10 22,38 27,18 31,28 35,14 40,24 48,24" fill="none" stroke="#1565c0" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <text x="58" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="30" fill="#1565c0">BMES</text>
+        <text x="58" y="50" font-family="Arial" font-style="italic" font-size="11.5" fill="#1565c0" letter-spacing="1.2">BEYOND THE EXPECTED®</text>
+      </svg>
+    </div>
+    <div class="login-title">Sign In to Capture App</div>
+    <div class="login-sub">Use your Acumatica account credentials</div>
+    <div class="lf"><label>Acumatica Site URL</label><input type="text" id="p-url" value="https://bmes.acumatica.com"/></div>
+    <div class="lf"><label>Username</label><input type="text" id="p-user" value="john.tariq"/></div>
+    <div class="lf"><label>Password</label><input type="password" id="p-pass" value="password"/></div>
+    <div class="login-err" id="login-err">Please fill in all fields to continue.</div>
+    <button class="login-btn" onclick="doLogin()">🔐 Sign In Securely</button>
+    <div class="login-note">Your credentials are authenticated directly against Acumatica.<br>The app does not store your password.</div>
+  </div>
+  <!-- iPad -->
+  <div class="lay-ip login-ip">
+    <div class="ipad-login-card">
+      <div style="text-align:center;margin-bottom:24px;">
+        <svg width="220" height="70" viewBox="0 0 200 65" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="44" height="44" rx="8" fill="none" stroke="#1565c0" stroke-width="3.5"/>
+          <polyline points="6,24 13,24 17,10 22,38 27,18 31,28 35,14 40,24 48,24" fill="none" stroke="#1565c0" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="58" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="30" fill="#1565c0">BMES</text>
+          <text x="58" y="50" font-family="Arial" font-style="italic" font-size="11.5" fill="#1565c0" letter-spacing="1.2">BEYOND THE EXPECTED®</text>
+        </svg>
+      </div>
+      <div style="font-size:17px;font-weight:700;color:#222;margin-bottom:6px;text-align:center;">Sign In to Capture App</div>
+      <div style="font-size:12px;color:#888;margin-bottom:22px;text-align:center;">Authenticate with your Acumatica credentials</div>
+      <div class="ilf"><label>Acumatica Site URL</label><input type="text" value="https://bmes.acumatica.com"/></div>
+      <div class="ilf"><label>Username</label><input type="text" value="john.tariq"/></div>
+      <div class="ilf"><label>Password</label><input type="password" value="password"/></div>
+      <button class="ipad-login-btn" onclick="doLogin()">🔐 Sign In Securely</button>
+      <div style="font-size:10.5px;color:#aaa;margin-top:12px;line-height:1.5;text-align:center;">Credentials authenticated directly against Acumatica.<br>The app does not store your password.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════╗
+     ║  SCREEN: QUEUE               ║
+     ╚══════════════════════════════╝ -->
+<div id="screen-queue" class="screen">
+  <!-- Phone -->
+  <div class="lay-ph" style="flex-direction:column;flex:1;overflow:hidden;">
+    <div class="app-hdr">
+      <div class="app-hdr-top nomg">
+        <svg width="80" height="26" viewBox="0 0 200 65" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="44" height="44" rx="8" fill="none" stroke="white" stroke-width="3.5"/>
+          <polyline points="6,24 13,24 17,10 22,38 27,18 31,28 35,14 40,24 48,24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="58" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="30" fill="white">BMES</text>
+          <text x="58" y="50" font-family="Arial" font-style="italic" font-size="11" fill="rgba(255,255,255,.8)" letter-spacing="1.2">BEYOND THE EXPECTED®</text>
+        </svg>
+        <div class="user-chip">👤 John Tariq</div>
+      </div>
+    </div>
+    <div class="app-content" id="ph-queue-body"></div>
+    <div class="bnav">
+      <div class="bnav-item" onclick="goTo('capture')"><div class="bnav-ico">📷</div><div class="bnav-lbl">Capture</div></div>
+      <div class="bnav-item on" onclick="goTo('queue')"><div class="bnav-ico">🗂</div><div class="bnav-lbl">Queue</div></div>
+      <div class="bnav-item" onclick="goTo('search')"><div class="bnav-ico">🔍</div><div class="bnav-lbl">Search SO</div></div>
+      <div class="bnav-item" onclick="goTo('profile')"><div class="bnav-ico">👤</div><div class="bnav-lbl">Profile</div></div>
+    </div>
+  </div>
+  <!-- iPad -->
+  <div class="lay-ip" style="flex-direction:column;flex:1;overflow:hidden;">
+    <div class="ipad-hdr">
+      <div class="ipad-hdr-l">
+        <svg width="90" height="28" viewBox="0 0 200 65" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="44" height="44" rx="8" fill="none" stroke="white" stroke-width="3.5"/>
+          <polyline points="6,24 13,24 17,10 22,38 27,18 31,28 35,14 40,24 48,24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="58" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="30" fill="white">BMES</text>
+          <text x="58" y="50" font-family="Arial" font-style="italic" font-size="11" fill="rgba(255,255,255,.7)" letter-spacing="1.2">BEYOND THE EXPECTED®</text>
+        </svg>
+        <div style="color:white;font-size:13px;font-weight:600;">Capture Queue</div>
+      </div>
+      <div class="ipad-hdr-r">
+        <button class="ipad-hdr-btn" onclick="goTo('qr')">📷 Scan QR Code</button>
+        <div class="ipad-uc">👤 John Tariq</div>
+      </div>
+    </div>
+    <div class="ipad-q-body" style="flex:1;overflow:hidden;">
+      <div class="ipad-q-left" id="ip-queue-list"></div>
+      <div class="ipad-q-right" id="ip-queue-preview"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════╗
+     ║  SCREEN: QR SCANNER          ║
+     ╚══════════════════════════════╝ -->
+<div id="screen-qr" class="screen" style="position:relative;">
+  <div class="qr-hdr">
+    <svg width="60" height="20" viewBox="0 0 200 65" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="2" width="44" height="44" rx="8" fill="none" stroke="white" stroke-width="3.5"/>
+      <polyline points="6,24 13,24 17,10 22,38 27,18 31,28 35,14 40,24 48,24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="58" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="30" fill="white">BMES</text>
+    </svg>
+    <div class="qr-cancel" onclick="cancelQR()">Cancel</div>
+  </div>
+  <div class="qr-hint">Scan the QR code on the Acumatica Sales Order screen</div>
+  <div class="qr-vf">
+    <div class="qr-frame">
+      <div class="qr-corner tl"></div><div class="qr-corner tr"></div>
+      <div class="qr-corner bl"></div><div class="qr-corner br"></div>
+      <div class="qr-scan-line"></div>
+      <div style="position:absolute;inset:22px;display:flex;align-items:center;justify-content:center;opacity:.18;">
+        <svg width="110" height="110" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="10" width="40" height="40" fill="white" rx="2"/><rect x="16" y="16" width="28" height="28" fill="#111" rx="1"/>
+          <rect x="110" y="10" width="40" height="40" fill="white" rx="2"/><rect x="116" y="16" width="28" height="28" fill="#111" rx="1"/>
+          <rect x="10" y="110" width="40" height="40" fill="white" rx="2"/><rect x="16" y="116" width="28" height="28" fill="#111" rx="1"/>
+          <rect x="60" y="12" width="6" height="6" fill="white"/><rect x="70" y="12" width="6" height="6" fill="white"/>
+          <rect x="60" y="22" width="6" height="6" fill="white"/><rect x="80" y="22" width="6" height="6" fill="white"/>
+          <rect x="60" y="60" width="30" height="6" fill="white"/><rect x="100" y="60" width="6" height="6" fill="white"/>
+          <rect x="60" y="72" width="6" height="6" fill="white"/><rect x="100" y="72" width="6" height="6" fill="white"/>
+          <rect x="110" y="60" width="40" height="6" fill="white"/><rect x="110" y="72" width="6" height="12" fill="white"/>
+          <rect x="130" y="72" width="20" height="6" fill="white"/><rect x="60" y="110" width="6" height="40" fill="white"/>
+          <rect x="72" y="110" width="18" height="6" fill="white"/><rect x="72" y="130" width="18" height="20" fill="white"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div id="qr-badge">● Scanning...</div>
+  <div class="qr-inst">Hold steady over the QR code on the Acumatica Sales Order screen.<br>The order will load automatically.</div>
+</div>
+
+<!-- ╔══════════════════════════════╗
+     ║  SCREEN: CAPTURE             ║
+     ╚══════════════════════════════╝ -->
+<div id="screen-capture" class="screen">
+  <!-- Phone -->
+  <div class="lay-ph" style="flex-direction:column;flex:1;overflow:hidden;">
+    <div class="app-hdr" id="cap-ph-hdr"></div>
+    <div class="stage-tabs" id="cap-ph-tabs"></div>
+    <div class="app-content" id="cap-ph-body"></div>
+    <div class="bnav">
+      <div class="bnav-item on"><div class="bnav-ico">📷</div><div class="bnav-lbl">Capture</div></div>
+      <div class="bnav-item" onclick="goTo('queue')"><div class="bnav-ico">🗂</div><div class="bnav-lbl">Queue</div></div>
+      <div class="bnav-item" onclick="goTo('search')"><div class="bnav-ico">🔍</div><div class="bnav-lbl">Search SO</div></div>
+      <div class="bnav-item" onclick="goTo('profile')"><div class="bnav-ico">👤</div><div class="bnav-lbl">Profile</div></div>
+    </div>
+  </div>
+  <!-- iPad -->
+  <div class="lay-ip" style="flex-direction:column;flex:1;overflow:hidden;">
+    <div class="ipad-hdr" id="cap-ip-hdr"></div>
+    <div class="ipad-stabs" id="cap-ip-tabs"></div>
+    <div class="ipad-body" style="flex:1;overflow:hidden;">
+      <div class="ipad-left" id="cap-ip-left"></div>
+      <div class="ipad-right">
+        <div class="ipad-cam-area">
+          <div class="ipad-grid-lines"></div>
+          <div class="ipad-stage-overlay">
+            <div class="ipad-stage-badge" id="ip-stage-badge" style="border-color:#ff9800;color:#ff9800;">● WIP STAGE — SO004521</div>
+          </div>
+          <div class="ipad-sil">💻</div>
+          <div class="ipad-flash" id="ip-flash"></div>
+        </div>
+        <div class="ipad-cam-ctrls">
+          <button class="ipad-cam-btn" onclick="toast('Switched to front camera')">🔄 Flip Camera</button>
+          <div class="ipad-shutter" onclick="shutterIPad()"><div class="ipad-shutter-inner"></div></div>
+          <button class="ipad-cam-btn" onclick="goTo('queue')">✕ Back to Queue</button>
+        </div>
+        <!-- iPad Photo Detail Overlay -->
+        <div id="ipad-pd-overlay">
+          <div class="pd-hdr">
+            <div class="pd-back" onclick="closeIPadPD()">‹ Back</div>
+            <div class="pd-ttl" id="ip-pd-title">Before — Photo 1</div>
+            <div style="width:40px;"></div>
+          </div>
+          <div class="pd-img" id="ip-pd-img">💻</div>
+          <div class="pd-meta" id="ip-pd-meta"></div>
+          <div class="pd-acts">
+            <button class="btn-del" id="ip-pd-del">🗑 Delete</button>
+            <button class="btn-ret" id="ip-pd-ret">🔄 Delete &amp; Retake</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════╗
+     ║  SCREEN: CAMERA (phone)      ║
+     ╚══════════════════════════════╝ -->
+<div id="screen-camera" class="screen" style="background:#000;">
+  <div class="cam-hdr">
+    <div class="cam-badge" id="cam-badge" style="background:#1565c0;">● BEFORE</div>
+    <div class="cam-so" id="cam-so">SO004521</div>
+    <div class="cam-num" id="cam-num">Photo 1</div>
+  </div>
+  <div class="cam-vf">
+    <div class="cam-grid"></div>
+    <div class="cam-sil">💻</div>
+    <div class="cam-flash" id="cam-flash"></div>
+  </div>
+  <div class="cam-infobar">
+    <span class="cam-info-lbl" id="cam-info">SO004521 · BEFORE · Photo 1</span>
+    <span class="cam-res">HD</span>
+  </div>
+  <div class="cam-ctrls">
+    <div class="cam-cancel" onclick="cancelCamera()">Cancel</div>
+    <div class="shutter" onclick="shutterPhone()"><div class="shutter-inner"></div></div>
+    <div class="cam-flip" onclick="toast('Switched to front camera')">🔄</div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════╗
+     ║  SCREEN: PHOTO DETAIL        ║
+     ╚══════════════════════════════╝ -->
+<div id="screen-pd" class="screen" style="background:#111;">
+  <div class="pd-hdr">
+    <div class="pd-back" onclick="backFromPD()">‹ Back</div>
+    <div class="pd-ttl" id="pd-title">Before — Photo 1</div>
+    <div style="width:40px;"></div>
+  </div>
+  <div class="pd-img" id="pd-img" style="background:linear-gradient(135deg,#1565c0,#42a5f5);">💻</div>
+  <div class="pd-meta" id="pd-meta"></div>
+  <div class="pd-acts">
+    <button class="btn-del" id="pd-del-btn">🗑 Delete</button>
+    <button class="btn-ret" id="pd-ret-btn">🔄 Delete &amp; Retake</button>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════╗
+     ║  SCREEN: SEARCH              ║
+     ╚══════════════════════════════╝ -->
+<div id="screen-search" class="screen">
+  <!-- Phone -->
+  <div class="lay-ph" style="flex-direction:column;flex:1;overflow:hidden;">
+    <div class="srch-hdr">
+      <div class="srch-ttl">Search Sales Orders</div>
+      <div class="srch-bar">
+        <span class="srch-ico">🔍</span>
+        <input type="text" id="srch-ph-input" placeholder="SO number or customer name…" oninput="doSearch(this.value,'srch-ph-results')"/>
+      </div>
+    </div>
+    <div class="srch-body" id="srch-ph-results"></div>
+    <div class="bnav">
+      <div class="bnav-item" onclick="goTo('capture')"><div class="bnav-ico">📷</div><div class="bnav-lbl">Capture</div></div>
+      <div class="bnav-item" onclick="goTo('queue')"><div class="bnav-ico">🗂</div><div class="bnav-lbl">Queue</div></div>
+      <div class="bnav-item on"><div class="bnav-ico">🔍</div><div class="bnav-lbl">Search SO</div></div>
+      <div class="bnav-item" onclick="goTo('profile')"><div class="bnav-ico">👤</div><div class="bnav-lbl">Profile</div></div>
+    </div>
+  </div>
+  <!-- iPad -->
+  <div class="lay-ip" style="flex-direction:column;flex:1;overflow:hidden;">
+    <div class="ipad-hdr">
+      <div class="ipad-hdr-l">
+        <svg width="80" height="26" viewBox="0 0 200 65" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="44" height="44" rx="8" fill="none" stroke="white" stroke-width="3.5"/>
+          <polyline points="6,24 13,24 17,10 22,38 27,18 31,28 35,14 40,24 48,24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="58" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="30" fill="white">BMES</text>
+        </svg>
+        <div style="color:white;font-size:13px;font-weight:600;">Search Sales Orders</div>
+      </div>
+      <div class="ipad-hdr-r"><div class="ipad-uc">👤 John Tariq</div></div>
+    </div>
+    <div style="padding:12px 20px;background:#f8f9fa;border-bottom:1px solid var(--border);flex-shrink:0;">
+      <div class="srch-bar" style="background:white;border:1px solid var(--border);">
+        <span class="srch-ico">🔍</span>
+        <input type="text" id="srch-ip-input" placeholder="SO number or customer name…" oninput="doSearch(this.value,'srch-ip-results')" style="font-size:13px;"/>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;flex:1;overflow:hidden;">
+      <div style="padding:14px;overflow-y:auto;border-right:1px solid var(--border);" id="srch-ip-results"></div>
+      <div style="padding:14px;background:white;overflow-y:auto;" id="srch-ip-preview">
+        <div style="text-align:center;padding:40px 20px;">
+          <div style="font-size:28px;margin-bottom:8px;">🔍</div>
+          <div style="font-size:12px;color:#999;">Search for a Sales Order or select one from the list</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════╗
+     ║  SCREEN: PROFILE             ║
+     ╚══════════════════════════════╝ -->
+<div id="screen-profile" class="screen">
+  <!-- Phone -->
+  <div class="lay-ph" style="flex-direction:column;flex:1;overflow:hidden;">
+    <div class="prof-hdr">
+      <div class="prof-avatar">👤</div>
+      <div class="prof-name">John Tariq</div>
+      <div class="prof-role">Field Technician · BMES</div>
+    </div>
+    <div class="prof-body">
+      <div class="prof-sec">
+        <div class="prof-sec-ttl">App Settings</div>
+        <div class="prof-card">
+          <div class="prof-row" onclick="goTo('setup')"><div class="prof-ico">⚙️</div><div class="prof-info"><div class="prof-lbl">Setup</div><div class="prof-desc">Branding, connection, stages, security</div></div><div class="prof-chev">›</div></div>
+          <div class="prof-row" onclick="toast('Notification settings coming in v1.1')"><div class="prof-ico">🔔</div><div class="prof-info"><div class="prof-lbl">Notifications</div><div class="prof-desc">Sync alerts and reminders</div></div><div class="prof-chev">›</div></div>
+        </div>
+      </div>
+      <div class="prof-sec">
+        <div class="prof-sec-ttl">Account</div>
+        <div class="prof-card">
+          <div class="prof-row"><div class="prof-ico">🏢</div><div class="prof-info"><div class="prof-lbl">Connected To</div><div class="prof-desc">bmes.acumatica.com · BMES tenant</div></div><div class="prof-badge">Active</div></div>
+          <div class="prof-row"><div class="prof-ico">🔐</div><div class="prof-info"><div class="prof-lbl">Session</div><div class="prof-desc">Expires in 7h 42m · OAuth 2.0</div></div></div>
+        </div>
+      </div>
+      <div class="prof-sec">
+        <div class="prof-sec-ttl">Support &amp; Reference</div>
+        <div class="prof-card">
+          <div class="prof-row" onclick="toast('Opening support@tayana.com')"><div class="prof-ico">📧</div><div class="prof-info"><div class="prof-lbl">support@tayana.com</div><div class="prof-desc">Tayana Solutions support</div></div></div>
+          <div class="prof-row" onclick="goTo('acumatica-ref')"><div class="prof-ico">🖥</div><div class="prof-info"><div class="prof-lbl">Acumatica SO Pictures Tab</div><div class="prof-desc">View what the CSR sees on the desktop</div></div><div class="prof-chev">›</div></div>
+        </div>
+      </div>
+      <div class="prof-sec">
+        <div class="prof-card">
+          <div class="prof-row" onclick="confirmSignOut()"><div class="prof-ico">🚪</div><div class="prof-info"><div class="prof-lbl" style="color:var(--red);">Sign Out</div><div class="prof-desc">Clear session and return to login</div></div></div>
+        </div>
+      </div>
+      <div class="prof-ver">BMES Capture App · v1.0.0 · Prototype</div>
+    </div>
+    <div class="bnav">
+      <div class="bnav-item" onclick="goTo('capture')"><div class="bnav-ico">📷</div><div class="bnav-lbl">Capture</div></div>
+      <div class="bnav-item" onclick="goTo('queue')"><div class="bnav-ico">🗂</div><div class="bnav-lbl">Queue</div></div>
+      <div class="bnav-item" onclick="goTo('search')"><div class="bnav-ico">🔍</div><div class="bnav-lbl">Search SO</div></div>
+      <div class="bnav-item on"><div class="bnav-ico">👤</div><div class="bnav-lbl">Profile</div></div>
+    </div>
+  </div>
+  <!-- iPad -->
+  <div class="lay-ip" style="flex-direction:column;flex:1;overflow:hidden;">
+    <div class="ipad-hdr">
+      <div class="ipad-hdr-l">
+        <svg width="90" height="28" viewBox="0 0 200 65" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="2" width="44" height="44" rx="8" fill="none" stroke="white" stroke-width="3.5"/>
+          <polyline points="6,24 13,24 17,10 22,38 27,18 31,28 35,14 40,24 48,24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="58" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="30" fill="white">BMES</text>
+        </svg>
+        <div style="color:white;font-size:13px;font-weight:600;">Profile</div>
+      </div>
+      <div class="ipad-hdr-r"><div class="ipad-uc">👤 John Tariq</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;flex:1;overflow:hidden;">
+      <div style="padding:20px;overflow-y:auto;border-right:1px solid var(--border);">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding:14px;background:var(--blue-lt);border-radius:10px;">
+          <div style="font-size:40px;">👤</div>
+          <div><div style="font-size:15px;font-weight:700;color:#222;">John Tariq</div><div style="font-size:11px;color:#888;margin-top:2px;">Field Technician · BMES</div><div style="font-size:10px;color:var(--blue);margin-top:4px;">● Session active · 7h 42m remaining</div></div>
+        </div>
+        <div class="prof-sec"><div class="prof-sec-ttl">App Settings</div><div class="prof-card"><div class="prof-row" onclick="goTo('setup')"><div class="prof-ico">⚙️</div><div class="prof-info"><div class="prof-lbl">Setup</div><div class="prof-desc">Branding, connection, stages, security</div></div><div class="prof-chev">›</div></div></div></div>
+        <div class="prof-sec"><div class="prof-card"><div class="prof-row" onclick="confirmSignOut()"><div class="prof-ico">🚪</div><div class="prof-info"><div class="prof-lbl" style="color:var(--red);">Sign Out</div><div class="prof-desc">Clear session and return to login</div></div></div></div></div>
+      </div>
+      <div style="padding:20px;overflow-y:auto;">
+        <div class="prof-sec"><div class="prof-sec-ttl">Connection</div><div class="prof-card"><div class="prof-row"><div class="prof-ico">🏢</div><div class="prof-info"><div class="prof-lbl">bmes.acumatica.com · BMES</div><div class="prof-desc">Acumatica 2026 R1 · AWS storage active</div></div><div class="prof-badge">Active</div></div></div></div>
+        <div class="prof-sec"><div class="prof-sec-ttl">Support</div><div class="prof-card"><div class="prof-row"><div class="prof-ico">📧</div><div class="prof-info"><div class="prof-lbl">support@tayana.com</div><div class="prof-desc">Tayana Solutions support</div></div></div><div class="prof-row"><div class="prof-ico">📞</div><div class="prof-info"><div class="prof-lbl">+1 888 000 0000</div><div class="prof-desc">Direct support line</div></div></div></div></div>
+        <div class="prof-sec"><div class="prof-card"><div class="prof-row" onclick="goTo('acumatica-ref')"><div class="prof-ico">🖥</div><div class="prof-info"><div class="prof-lbl">Acumatica SO Pictures Tab</div><div class="prof-desc">View what the CSR sees on the desktop</div></div><div class="prof-chev">›</div></div></div></div>
+        <div class="prof-ver">BMES Capture App · v1.0.0 · Prototype</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════╗
+     ║  SCREEN: SETUP               ║
+     ╚══════════════════════════════╝ -->
+<div id="screen-setup" class="screen">
+  <!-- Phone -->
+  <div class="lay-ph" style="flex-direction:column;flex:1;overflow:hidden;">
+    <div class="setup-hdr">
+      <div class="setup-hdr-row">
+        <div class="setup-back" onclick="goTo('profile')">‹ Profile</div>
+        <div class="setup-hdr-ttl">Setup</div>
+        <button class="setup-save" onclick="toast('Settings saved successfully')">Save</button>
+      </div>
+    </div>
+    <div class="setup-body" id="setup-ph-body">
+      <!-- BRANDING -->
+      <div class="setup-sec">
+        <div class="setup-sec-hdr"><span class="setup-sec-ttl">Branding</span><span class="admin-badge">🔒 Admin Only</span></div>
+        <div class="setup-card">
+          <div class="logo-area">
+            <div class="logo-prev"><svg viewBox="0 0 200 65" xmlns="http://www.w3.org/2000/svg" style="width:78px;height:28px;"><rect x="2" y="2" width="44" height="44" rx="8" fill="none" stroke="#1565c0" stroke-width="3.5"/><polyline points="6,24 13,24 17,10 22,38 27,18 31,28 35,14 40,24 48,24" fill="none" stroke="#1565c0" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><text x="58" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="30" fill="#1565c0">BMES</text></svg></div>
+            <div class="logo-info"><div class="logo-lbl">App Logo</div><div class="logo-desc">PNG or SVG · max 200 KB</div></div>
+            <button class="logo-btn" onclick="toast('File picker would open here')">Upload</button>
+          </div>
+          <div class="srow"><div class="srow-ico">🏷</div><div class="srow-info"><div class="srow-lbl">App Display Name</div><div class="srow-desc">Shown on login screen and browser tab</div></div><input type="text" class="s-input" value="BMES Capture"></div>
+        </div>
+      </div>
+      <!-- ACUMATICA CONNECTION -->
+      <div class="setup-sec">
+        <div class="setup-sec-hdr"><span class="setup-sec-ttl">Acumatica Connection</span><span class="admin-badge">🔒 Admin Only</span></div>
+        <div class="setup-card">
+          <div class="srow"><div class="srow-ico">🔗</div><div class="srow-info"><div class="srow-lbl">Site URL</div><div class="srow-desc">Your Acumatica instance address</div></div><input type="text" class="s-input" value="bmes.acumatica.com" style="width:140px;font-size:10.5px;"></div>
+          <div class="srow"><div class="srow-ico">🏢</div><div class="srow-info"><div class="srow-lbl">Tenant / Company</div><div class="srow-desc">Acumatica tenant identifier</div></div><input type="text" class="s-input" value="BMES" style="width:80px;"></div>
+        </div>
+      </div>
+      <!-- STAGE CONFIGURATION -->
+      <div class="setup-sec">
+        <div class="setup-sec-hdr"><span class="setup-sec-ttl">Stage Configuration</span><span class="admin-badge">🔒 Admin Only</span></div>
+        <div class="setup-card">
+          <div class="stage-cfg-row"><div class="scol-dot" style="background:var(--blue);"></div><input type="text" class="scol-input" value="Before"><span class="s-remove">×</span></div>
+          <div class="stage-cfg-row"><div class="scol-dot" style="background:var(--orange);"></div><input type="text" class="scol-input" value="WIP"><span class="s-remove">×</span></div>
+          <div class="stage-cfg-row"><div class="scol-dot" style="background:var(--green);"></div><input type="text" class="scol-input" value="After"><span class="s-remove">×</span></div>
+          <div class="add-stage" onclick="toast('Maximum 5 stages supported')">+ Add Stage &nbsp;<span style="font-size:10px;color:#aaa;font-weight:400;">(max 5)</span></div>
+        </div>
+      </div>
+      <!-- FILE SETTINGS -->
+      <div class="setup-sec">
+        <div class="setup-sec-hdr"><span class="setup-sec-ttl">File Settings</span><span class="admin-badge">🔒 Admin Only</span></div>
+        <div class="setup-card">
+          <div class="srow"><div class="srow-ico">📄</div><div class="srow-info"><div class="srow-lbl">File Naming Template</div><div class="srow-desc">{SO}_{Stage}_{Seq} → SO004521_B_001</div></div><input type="text" class="s-input" value="{SO}_{Stage}_{Seq}" style="width:130px;font-size:10.5px;"></div>
+          <div class="srow"><div class="srow-ico">📐</div><div class="srow-info"><div class="srow-lbl">Capture Resolution</div><div class="srow-desc">Max dimension of compressed image</div></div><select class="s-select"><option selected>1280 × 960</option><option>1920 × 1440</option><option>800 × 600</option></select></div>
+          <div class="srow"><div class="srow-ico">🗜</div><div class="srow-info"><div class="srow-lbl">JPEG Quality</div><div class="srow-desc">80% recommended — approx. 300 KB per photo</div></div><div style="display:flex;align-items:center;gap:6px;"><input type="range" class="s-slider" min="60" max="95" value="80" oninput="this.nextElementSibling.textContent=this.value+'%'"><span class="val-chip">80%</span></div></div>
+        </div>
+      </div>
+      <!-- CAPTURE SETTINGS -->
+      <div class="setup-sec">
+        <div class="setup-sec-hdr"><span class="setup-sec-ttl">Capture Settings</span></div>
+        <div class="setup-card">
+          <div class="srow"><div class="srow-ico">📍</div><div class="srow-info"><div class="srow-lbl">Capture GPS Coordinates</div><div class="srow-desc">Records latitude and longitude with every photo</div></div><div class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off');"><div class="tog-k"></div></div></div>
+          <div class="srow"><div class="srow-ico">💾</div><div class="srow-info"><div class="srow-lbl">Save Copy to Device</div><div class="srow-desc">Saves compressed copy to camera roll after upload</div></div><div class="tog off" onclick="this.classList.toggle('on');this.classList.toggle('off');"><div class="tog-k"></div></div></div>
+          <div class="srow"><div class="srow-ico">🖼</div><div class="srow-info"><div class="srow-lbl">Allow Gallery Upload</div><div class="srow-desc">Shows Upload from Gallery button on capture screen</div></div><div class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off');"><div class="tog-k"></div></div></div>
+          <div class="srow"><div class="srow-ico">📂</div><div class="srow-info"><div class="srow-lbl">Default Stage on Load</div><div class="srow-desc">Which stage opens when order loads via QR scan</div></div><select class="s-select"><option selected>Auto-detect</option><option>Always Before</option><option>Always WIP</option><option>Always After</option></select></div>
+        </div>
+      </div>
+      <!-- SECURITY -->
+      <div class="setup-sec">
+        <div class="setup-sec-hdr"><span class="setup-sec-ttl">Security</span></div>
+        <div class="setup-card">
+          <div class="srow"><div class="srow-ico">🔒</div><div class="srow-info"><div class="srow-lbl">App Lock</div><div class="srow-desc">Requires Face ID, Touch ID, or PIN after idle</div></div><div class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off');"><div class="tog-k"></div></div></div>
+          <div class="srow"><div class="srow-ico">⏱</div><div class="srow-info"><div class="srow-lbl">Auto-Lock Timeout</div></div><select class="s-select"><option>1 minute</option><option selected>5 minutes</option><option>10 minutes</option><option>Never</option></select></div>
+          <div class="srow"><div class="srow-ico">🔑</div><div class="srow-info"><div class="srow-lbl">PIN Management</div><div class="srow-desc">Change or reset your 4-digit backup PIN</div></div><button class="row-act" onclick="toast('PIN change flow would open here')">Change PIN</button></div>
+          <div class="srow"><div class="srow-ico">👤</div><div class="srow-info"><div class="srow-lbl">Session Timeout</div><div class="srow-desc">Time before full re-login is required</div></div><select class="s-select"><option>4 hours</option><option selected>8 hours</option><option>24 hours</option></select></div>
+        </div>
+      </div>
+      <!-- SYNC -->
+      <div class="setup-sec">
+        <div class="setup-sec-hdr"><span class="setup-sec-ttl">Sync Settings</span></div>
+        <div class="setup-card">
+          <div class="srow"><div class="srow-ico">🔔</div><div class="srow-info"><div class="srow-lbl">Sync Failure Alert</div><div class="srow-desc">Shows a red banner when an upload fails</div></div><div class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off');"><div class="tog-k"></div></div></div>
+          <div class="srow"><div class="srow-ico">🔄</div><div class="srow-info"><div class="srow-lbl">Auto Retry on Failure</div><div class="srow-desc">Retries failed uploads when connection is restored</div></div><div class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off');"><div class="tog-k"></div></div></div>
+        </div>
+      </div>
+      <!-- SUPPORT -->
+      <div class="setup-sec">
+        <div class="setup-sec-hdr"><span class="setup-sec-ttl">Support Contact</span><span class="admin-badge">🔒 Admin Only</span></div>
+        <div class="setup-card">
+          <div class="srow"><div class="srow-ico">📧</div><div class="srow-info"><div class="srow-lbl">Support Email</div></div><input type="text" class="s-input" value="support@tayana.com" style="width:170px;font-size:10.5px;"></div>
+          <div class="srow"><div class="srow-ico">📞</div><div class="srow-info"><div class="srow-lbl">Support Phone</div></div><input type="text" class="s-input" value="+1 888 000 0000"></div>
+        </div>
+      </div>
+      <!-- DANGER ZONE -->
+      <div class="setup-sec">
+        <div class="setup-sec-hdr"><span class="setup-sec-ttl danger">Danger Zone</span><span class="admin-badge">🔒 Admin Only</span></div>
+        <div class="setup-card">
+          <div class="srow"><div class="srow-ico">🗑</div><div class="srow-info"><div class="srow-lbl">Reset All Settings</div><div class="srow-desc">Restores all configuration to factory defaults. Cannot be undone.</div></div><button class="row-act danger" onclick="toast('Reset requires admin PIN')">Reset</button></div>
+          <div class="srow"><div class="srow-ico">🚪</div><div class="srow-info"><div class="srow-lbl">Sign Out</div><div class="srow-desc">Clears the session and returns to login</div></div><button class="row-act danger" onclick="confirmSignOut()">Sign Out</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- iPad Setup (two-column) -->
+  <div class="lay-ip" style="flex-direction:column;flex:1;overflow:hidden;">
+    <div class="setup-hdr">
+      <div class="setup-hdr-row">
+        <div class="setup-back" onclick="goTo('profile')">‹ Profile</div>
+        <div class="setup-hdr-ttl">Setup</div>
+        <button class="setup-save" onclick="toast('All settings saved successfully')">Save All Changes</button>
+      </div>
+    </div>
+    <div class="setup-2col">
+      <!-- LEFT: Admin settings -->
+      <div class="setup-col">
+        <div class="setup-sec"><div class="setup-sec-hdr"><span class="setup-sec-ttl">Branding</span><span class="admin-badge">🔒 Admin Only</span></div><div class="setup-card"><div class="logo-area"><div class="logo-prev"><svg viewBox="0 0 200 65" xmlns="http://www.w3.org/2000/svg" style="width:78px;height:28px;"><rect x="2" y="2" width="44" height="44" rx="8" fill="none" stroke="#1565c0" stroke-width="3.5"/><polyline points="6,24 13,24 17,10 22,38 27,18 31,28 35,14 40,24 48,24" fill="none" stroke="#1565c0" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><text x="58" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="30" fill="#1565c0">BMES</text></svg></div><div class="logo-info"><div class="logo-lbl">App Logo</div><div class="logo-desc">PNG or SVG · max 200 KB</div></div><button class="logo-btn">Upload</button></div><div class="srow"><div class="srow-ico">🏷</div><div class="srow-info"><div class="srow-lbl">App Display Name</div></div><input type="text" class="s-input" value="BMES Capture"></div></div></div>
+        <div class="setup-sec"><div class="setup-sec-hdr"><span class="setup-sec-ttl">Acumatica Connection</span><span class="admin-badge">🔒 Admin Only</span></div><div class="setup-card"><div class="srow"><div class="srow-ico">🔗</div><div class="srow-info"><div class="srow-lbl">Site URL</div></div><input type="text" class="s-input" value="bmes.acumatica.com" style="width:160px;font-size:10.5px;"></div><div class="srow"><div class="srow-ico">🏢</div><div class="srow-info"><div class="srow-lbl">Tenant / Company</div></div><input type="text" class="s-input" value="BMES" style="width:80px;"></div></div></div>
+        <div class="setup-sec"><div class="setup-sec-hdr"><span class="setup-sec-ttl">Stage Configuration</span><span class="admin-badge">🔒 Admin Only</span></div><div class="setup-card"><div class="stage-cfg-row"><div class="scol-dot" style="background:var(--blue);"></div><input type="text" class="scol-input" value="Before"><span class="s-remove">×</span></div><div class="stage-cfg-row"><div class="scol-dot" style="background:var(--orange);"></div><input type="text" class="scol-input" value="WIP"><span class="s-remove">×</span></div><div class="stage-cfg-row"><div class="scol-dot" style="background:var(--green);"></div><input type="text" class="scol-input" value="After"><span class="s-remove">×</span></div><div class="add-stage">+ Add Stage</div></div></div>
+        <div class="setup-sec"><div class="setup-sec-hdr"><span class="setup-sec-ttl">File Settings</span><span class="admin-badge">🔒 Admin Only</span></div><div class="setup-card"><div class="srow"><div class="srow-ico">📄</div><div class="srow-info"><div class="srow-lbl">Naming Template</div><div class="srow-desc">Tokens: {SO} {Stage} {Date} {Seq}</div></div><input type="text" class="s-input" value="{SO}_{Stage}_{Seq}" style="width:160px;font-size:10.5px;"></div><div class="srow"><div class="srow-ico">📐</div><div class="srow-info"><div class="srow-lbl">Capture Resolution</div></div><select class="s-select"><option selected>1280 × 960</option><option>1920 × 1440</option><option>800 × 600</option></select></div><div class="srow"><div class="srow-ico">🗜</div><div class="srow-info"><div class="srow-lbl">JPEG Quality</div></div><div style="display:flex;align-items:center;gap:6px;"><input type="range" class="s-slider" style="width:120px;" min="60" max="95" value="80" oninput="this.nextElementSibling.textContent=this.value+'%'"><span class="val-chip">80%</span></div></div></div></div>
+        <div class="setup-sec"><div class="setup-sec-hdr"><span class="setup-sec-ttl">Support Contact</span><span class="admin-badge">🔒 Admin Only</span></div><div class="setup-card"><div class="srow"><div class="srow-ico">📧</div><div class="srow-info"><div class="srow-lbl">Support Email</div></div><input type="text" class="s-input" value="support@tayana.com" style="width:180px;font-size:10.5px;"></div><div class="srow"><div class="srow-ico">📞</div><div class="srow-info"><div class="srow-lbl">Support Phone</div></div><input type="text" class="s-input" value="+1 888 000 0000"></div></div></div>
+      </div>
+      <!-- RIGHT: User settings -->
+      <div class="setup-col">
+        <div class="setup-sec"><div class="setup-sec-hdr"><span class="setup-sec-ttl">Capture Settings</span></div><div class="setup-card"><div class="srow"><div class="srow-ico">📍</div><div class="srow-info"><div class="srow-lbl">Capture GPS Coordinates</div><div class="srow-desc">Records latitude, longitude, and accuracy with every photo. Capture proceeds even if unavailable.</div></div><div class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off');"><div class="tog-k"></div></div></div><div class="srow"><div class="srow-ico">💾</div><div class="srow-info"><div class="srow-lbl">Save Copy to Device</div><div class="srow-desc">Saves a compressed copy to the camera roll after each successful upload</div></div><div class="tog off" onclick="this.classList.toggle('on');this.classList.toggle('off');"><div class="tog-k"></div></div></div><div class="srow"><div class="srow-ico">🖼</div><div class="srow-info"><div class="srow-lbl">Allow Gallery Upload</div><div class="srow-desc">Shows Upload from Gallery button on the capture screen</div></div><div class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off');"><div class="tog-k"></div></div></div><div class="srow"><div class="srow-ico">📂</div><div class="srow-info"><div class="srow-lbl">Default Stage on Load</div><div class="srow-desc">Which stage opens when an order loads via QR scan</div></div><select class="s-select"><option selected>Auto-detect from Acumatica</option><option>Always Before</option><option>Always WIP</option><option>Always After</option></select></div></div></div>
+        <div class="setup-sec"><div class="setup-sec-hdr"><span class="setup-sec-ttl">Security</span></div><div class="setup-card"><div class="srow"><div class="srow-ico">🔒</div><div class="srow-info"><div class="srow-lbl">App Lock</div><div class="srow-desc">Requires Face ID, Touch ID, or PIN to resume after idle timeout</div></div><div class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off');"><div class="tog-k"></div></div></div><div class="srow"><div class="srow-ico">⏱</div><div class="srow-info"><div class="srow-lbl">Auto-Lock Timeout</div></div><select class="s-select"><option>1 minute</option><option selected>5 minutes</option><option>10 minutes</option><option>Never</option></select></div><div class="srow"><div class="srow-ico">🔑</div><div class="srow-info"><div class="srow-lbl">PIN Management</div><div class="srow-desc">Change or reset your 4-digit backup PIN</div></div><button class="row-act" onclick="toast('PIN change flow would open here')">Change PIN</button></div><div class="srow"><div class="srow-ico">👤</div><div class="srow-info"><div class="srow-lbl">Session Timeout</div></div><select class="s-select"><option>4 hours</option><option selected>8 hours</option><option>24 hours</option></select></div></div></div>
+        <div class="setup-sec"><div class="setup-sec-hdr"><span class="setup-sec-ttl">Sync Settings</span></div><div class="setup-card"><div class="srow"><div class="srow-ico">🔔</div><div class="srow-info"><div class="srow-lbl">Sync Failure Alert</div><div class="srow-desc">Notifies you immediately when an upload fails</div></div><div class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off');"><div class="tog-k"></div></div></div><div class="srow"><div class="srow-ico">🔄</div><div class="srow-info"><div class="srow-lbl">Auto Retry on Failure</div><div class="srow-desc">Retries failed uploads when connection is restored</div></div><div class="tog on" onclick="this.classList.toggle('on');this.classList.toggle('off');"><div class="tog-k"></div></div></div></div></div>
+        <div class="setup-sec"><div class="setup-sec-hdr"><span class="setup-sec-ttl danger">Danger Zone</span><span class="admin-badge">🔒 Admin Only</span></div><div class="setup-card"><div class="srow"><div class="srow-ico">🗑</div><div class="srow-info"><div class="srow-lbl">Reset All Settings</div><div class="srow-desc">Restores all configuration to factory defaults. Cannot be undone.</div></div><button class="row-act danger" onclick="toast('Reset requires admin PIN')">Reset</button></div><div class="srow"><div class="srow-ico">🚪</div><div class="srow-info"><div class="srow-lbl">Sign Out</div><div class="srow-desc">Clears the active session token and returns to the login screen</div></div><button class="row-act danger" onclick="confirmSignOut()">Sign Out</button></div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══════════════════════════════╗
+     ║  SCREEN: ACUMATICA REFERENCE ║
+     ╚══════════════════════════════╝ -->
+<div id="screen-acumatica-ref" class="screen">
+  <div class="acref-hdr">
+    <div class="acref-back" onclick="goTo('profile')">‹ Profile</div>
+    <div class="acref-ttl">Acumatica — SO Pictures Tab (CSR Desktop View)</div>
+    <div style="width:60px;"></div>
+  </div>
+  <div class="acref-body" id="acref-body"></div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay">
+  <div class="modal-sheet">
+    <div class="modal-ico" id="m-ico">⚠️</div>
+    <div class="modal-ttl" id="m-ttl">Confirm</div>
+    <div class="modal-msg" id="m-msg">Are you sure?</div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="hideModal()">Cancel</button>
+      <button class="modal-confirm red" id="m-confirm" onclick="execModal()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+</div><!-- end #app -->
+<div class="frame-homebar"><div class="pill"></div></div>
+</div><!-- end #app-frame -->
+
+<script>
+/* ============================================================
+   DATA
+============================================================ */
+const ORDERS = [
+  {id:'SO004521',cust:'Riverside Electronics Service',dot:'#ff9800',status:'In Processing',date:'05 May 2026'},
+  {id:'SO004518',cust:'TechCare Solutions',dot:'#c62828',status:'On Hold Customer',date:'04 May 2026'},
+  {id:'SO004510',cust:'Metro Repair Hub',dot:'#1565c0',status:'Ready to Ship',date:'04 May 2026'},
+  {id:'SO004505',cust:'Sunrise Device Repair',dot:'#ff9800',status:'In Processing',date:'03 May 2026'}
+];
+
+const GRADS = [
+  ['#42a5f5','#1565c0'],['#66bb6a','#2e7d32'],['#ab47bc','#6a1b9a'],
+  ['#ff7043','#bf360c'],['#26c6da','#00838f'],['#ffd54f','#f57f17']
+];
+
+// Photos: { orderId: { before:[{g}], wip:[{g}], after:[{g}] } }
+const PHOTOS = {
+  SO004521:{before:[{g:GRADS[0]},{g:GRADS[1]},{g:GRADS[2]}],wip:[],after:[]},
+  SO004518:{before:[],wip:[],after:[]},
+  SO004510:{before:[{g:GRADS[0]},{g:GRADS[1]}],wip:[{g:GRADS[2]}],after:[]},
+  SO004505:{before:[{g:GRADS[3]}],wip:[],after:[]}
+};
+
+/* ============================================================
+   STATE
+============================================================ */
+const S = {
+  screen:'login',
+  prevScreen:'login',
+  mode:'phone',
+  orderId:null,
+  stage:'before',
+  showSync:false,
+  modalCb:null,
+  qrTimer:null,
+  selQueueId:'SO004521',
+  pdStage:null,
+  pdIndex:0
+};
+
+/* ============================================================
+   MODE MANAGEMENT
+============================================================ */
+function setMode(m){
+  S.mode=m;
+  document.body.classList.remove('m-phone','m-ipad');
+  document.body.classList.add('m-'+m);
+  document.getElementById('app-frame').className=m==='phone'?'f-phone':'f-ipad';
+  document.getElementById('btn-phone').classList.toggle('active',m==='phone');
+  document.getElementById('btn-ipad').classList.toggle('active',m==='ipad');
+  renderScreen(S.screen);
+}
+
+function detectMode(){
+  const w=window.innerWidth;
+  if(w>=1100){setMode('phone');} // desktop default: phone frame
+  else if(w>=768){document.body.classList.add('m-ipad');S.mode='ipad';}
+  else{document.body.classList.add('m-phone');S.mode='phone';}
+}
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+function goTo(screen){
+  // Clear QR timer on exit
+  if(S.screen==='qr'&&S.qrTimer){clearTimeout(S.qrTimer);S.qrTimer=null;document.getElementById('qr-badge').style.display='none';}
+  S.prevScreen=S.screen;
+  S.screen=screen;
+  document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
+  const el=document.getElementById('screen-'+screen);
+  if(el)el.classList.add('active');
+  renderScreen(screen);
+}
+
+function renderScreen(s){
+  switch(s){
+    case 'queue':renderQueue();break;
+    case 'qr':startQR();break;
+    case 'capture':renderCapture();break;
+    case 'pd':renderPD();break;
+    case 'search':renderSearch('');break;
+    case 'acumatica-ref':renderAcRef();break;
+  }
+}
+
+/* ============================================================
+   RENDER: QUEUE
+============================================================ */
+function renderQueue(){
+  const phEl=document.getElementById('ph-queue-body');
+  const ipList=document.getElementById('ip-queue-list');
+  const ipPrev=document.getElementById('ip-queue-preview');
+
+  function orderRow(o,selected,clickFn){
+    return `<div class="q-item${selected?' sel':''}" onclick="${clickFn}('${o.id}')">
+      <div class="q-dot" style="background:${o.dot};"></div>
+      <div class="q-info"><div class="q-so">${o.id}</div><div class="q-cust">${o.cust}</div><div class="q-chips">${chips(o.id)}</div></div>
+      <div class="q-arr" style="${selected?'color:var(--blue)':''}">›</div>
+    </div>`;
+  }
+
+  // Phone list
+  if(phEl){
+    let h=`<div class="sec-title" style="margin-bottom:8px;">Pending Capture — ${pendingCount()} Orders</div>`;
+    ORDERS.forEach(o=>h+=orderRow(o,false,'openFromQueue'));
+    h+=`<div style="margin-top:10px;"><button class="btn-scan" onclick="goTo('qr')">📷 Scan QR Code to Open Order</button></div>`;
+    phEl.innerHTML=h;
+  }
+  // iPad list
+  if(ipList){
+    let h=`<div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">${pendingCount()} Orders Pending</div>`;
+    ORDERS.forEach(o=>h+=orderRow(o,o.id===S.selQueueId,'selectQueue'));
+    ipList.innerHTML=h;
+  }
+  if(ipPrev)renderQueuePreview(S.selQueueId);
+}
+
+function renderQueuePreview(id){
+  const el=document.getElementById('ip-queue-preview');
+  if(!el)return;
+  const o=ORDERS.find(x=>x.id===id);
+  if(!o){el.innerHTML='<div style="padding:20px;text-align:center;color:#999;font-size:12px;">Select an order to preview</div>';return;}
+  const p=PHOTOS[id];
+  const stageLine=(key,label)=>{
+    const n=p[key].length,ok=n>0;
+    return `<div style="background:${ok?'#e8f5e9':'#fff8e1'};border-radius:8px;padding:10px 12px;margin-bottom:8px;">
+      <div style="font-size:12px;font-weight:700;color:${ok?'#2e7d32':'#b45309'};margin-bottom:2px;">${ok?'✓':'●'} ${label} — ${n} photo${n!==1?'s':''}</div>
+      <div style="font-size:10.5px;color:#555;">${ok?'Captured by John Tariq · 05 May':'No photos captured yet'}</div>
+    </div>`;
+  };
+  el.innerHTML=`
+    <div style="font-size:13px;font-weight:700;color:#222;margin-bottom:2px;">${o.id}</div>
+    <div style="font-size:11px;color:#888;margin-bottom:12px;">${o.cust} · ${o.status}</div>
+    <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Stage Summary</div>
+    ${stageLine('before','Before')}${stageLine('wip','WIP')}${stageLine('after','After')}
+    <button style="width:100%;background:var(--blue);color:white;border:none;border-radius:8px;padding:12px;font-size:12.5px;font-weight:700;cursor:pointer;margin-top:4px;" onclick="openFromQueue('${id}')">📷 Open Capture for ${id}</button>`;
+}
+
+function selectQueue(id){S.selQueueId=id;renderQueue();}
+
+function pendingCount(){
+  return ORDERS.filter(o=>{const p=PHOTOS[o.id];return !p.before.length||!p.wip.length||!p.after.length;}).length;
+}
+
+function chips(id){
+  const p=PHOTOS[id];
+  const c=(l,ok)=>`<span class="chip ${ok?'chip-done':'chip-pend'}">${l}${ok?' ✓':''}</span>`;
+  return c('Before',p.before.length>0)+c('WIP',p.wip.length>0)+c('After',p.after.length>0);
+}
+
+function openFromQueue(id){
+  S.orderId=id;
+  const p=PHOTOS[id];
+  S.stage=!p.before.length?'before':!p.wip.length?'wip':!p.after.length?'after':'before';
+  S.showSync=false;
+  goTo('capture');
+}
+
+/* ============================================================
+   RENDER: CAPTURE
+============================================================ */
+function renderCapture(){
+  if(!S.orderId){renderCaptureNoOrder();return;}
+  renderCaptureHeader();
+  renderCaptureTabs();
+  renderCapturePhoneBody();
+  renderCaptureIPadLeft();
+  updateIPadBadge();
+}
+
+function renderCaptureNoOrder(){
+  const phH=document.getElementById('cap-ph-hdr');
+  if(phH)phH.innerHTML=`<div class="app-hdr-top nomg">${logoSVG('white',80,26,true)}<div class="user-chip">👤 John Tariq</div></div>`;
+  const phT=document.getElementById('cap-ph-tabs');if(phT)phT.innerHTML='';
+  const phB=document.getElementById('cap-ph-body');
+  if(phB)phB.innerHTML=`<div style="padding:40px 20px;text-align:center;"><div style="font-size:40px;margin-bottom:12px;">📷</div><div style="font-size:13px;font-weight:600;color:#555;margin-bottom:8px;">No Order Loaded</div><div style="font-size:11px;color:#999;margin-bottom:20px;line-height:1.5;">Scan a QR code from the Acumatica Sales Order screen, or select an order from the Queue.</div><button class="btn-scan" onclick="goTo('qr')">📷 Scan QR Code</button><div style="margin-top:8px;"><button class="btn-sec" onclick="goTo('queue')">🗂 Go to Queue</button></div></div>`;
+  const ipH=document.getElementById('cap-ip-hdr');
+  if(ipH)ipH.innerHTML=`<div class="ipad-hdr-l">${logoSVG('white',90,28,true)}<div style="color:white;font-size:13px;font-weight:600;">Capture</div></div><div class="ipad-hdr-r"><button class="ipad-hdr-btn" onclick="goTo('qr')">📷 Scan New Order</button><div class="ipad-uc">👤 John Tariq</div></div>`;
+  const ipT=document.getElementById('cap-ip-tabs');if(ipT)ipT.innerHTML=`<div style="padding:10px 20px;font-size:12px;color:#999;">No order loaded — scan a QR code or select from Queue</div><div class="istab-back" onclick="goTo('queue')">‹ Back to Queue</div>`;
+  const ipL=document.getElementById('cap-ip-left');
+  if(ipL)ipL.innerHTML=`<div style="text-align:center;padding:30px 10px;"><div style="font-size:30px;margin-bottom:8px;">📷</div><div style="font-size:12px;color:#777;margin-bottom:14px;">No order loaded</div><button class="btn-scan" style="font-size:11px;" onclick="goTo('qr')">Scan QR Code</button><div style="margin-top:8px;"><button class="btn-sec" style="font-size:11px;" onclick="goTo('queue')">🗂 Queue</button></div></div>`;
+  updateIPadBadge();
+}
+
+function renderCaptureHeader(){
+  const o=ORDERS.find(x=>x.id===S.orderId);if(!o)return;
+  const phH=document.getElementById('cap-ph-hdr');
+  if(phH)phH.innerHTML=`<div class="app-hdr-top">${logoSVG('white',80,26)}<div class="user-chip">👤 John Tariq</div></div><div class="so-card"><div class="so-num">${o.id}</div><div class="so-cust">${o.cust}</div><div class="so-meta"><div class="so-meta-item"><span class="so-dot-live"></span>${o.status}</div><div class="so-meta-item">📅 ${o.date}</div></div></div>`;
+  const ipH=document.getElementById('cap-ip-hdr');
+  if(ipH)ipH.innerHTML=`<div class="ipad-hdr-l">${logoSVG('white',90,28,true)}<div class="ipad-so-info"><div class="ipad-so-num">${o.id} — ${o.cust}</div><div><span class="ipad-so-status">● ${o.status}</span></div></div></div><div class="ipad-hdr-r"><button class="ipad-hdr-btn" onclick="goTo('qr')">📷 Scan New Order</button><div class="ipad-uc">👤 John Tariq</div></div>`;
+}
+
+function renderCaptureTabs(){
+  const p=PHOTOS[S.orderId];
+  const LABELS={before:'Before',wip:'WIP',after:'After'};
+
+  // Phone
+  const phT=document.getElementById('cap-ph-tabs');
+  if(phT){
+    phT.innerHTML=['before','wip','after'].map(s=>{
+      const n=p[s].length,active=s===S.stage,done=n>0&&!active;
+      return `<div class="stab${active?' on':done?' done':''}" onclick="switchStage('${s}')">
+        <div class="stab-lbl">${active?'● ':done?'✓ ':''}${LABELS[s]}</div>
+        <div class="stab-cnt">${n} photo${n!==1?'s':''}</div>
+      </div>`;
+    }).join('');
+  }
+  // iPad
+  const ipT=document.getElementById('cap-ip-tabs');
+  if(ipT){
+    const tabsHtml=['before','wip','after'].map(s=>{
+      const n=p[s].length,active=s===S.stage,done=n>0&&!active;
+      const icon=active?`<span style="color:var(--blue);font-size:13px;">●</span>`:done?`<span style="color:var(--green);font-size:13px;">✓</span>`:'';
+      return `<div class="istab${active?' on':done?' done':''}" onclick="switchStage('${s}')">${icon}<div><div class="istab-lbl">${LABELS[s]}</div><div class="istab-cnt">${n} photo${n!==1?'s':''}${active?' · Active':done?' · Complete':''}</div></div></div>`;
+    }).join('');
+    ipT.innerHTML=tabsHtml+`<div class="istab-back" onclick="goTo('queue')">‹ Back to Queue</div>`;
+  }
+}
+
+function renderCapturePhoneBody(){
+  const p=PHOTOS[S.orderId][S.stage];
+  const lbl=stageLbl(S.stage);
+  const col=stageCol(S.stage);
+  const desc=stageDesc(S.stage);
+  let h='';
+  if(S.showSync)h+=`<div class="sync-ok">✅ Photo ${p.length} synced to Acumatica successfully</div>`;
+  if(!p.length){
+    h+=`<div class="stage-card"><div class="stage-card-title"><span class="sdot" style="background:${col};"></span>${lbl==='Before'?'Before — Intake Condition':lbl==='WIP'?'Work In Progress (WIP)':'After — Ready to Return'}</div><div class="stage-card-sub">${desc}</div></div>`;
+    h+=`<div class="sec-title">Captured So Far</div>`;
+    h+=`<div class="empty-state"><div class="empty-ico">${S.stage==='before'?'📭':S.stage==='wip'?'🔧':'📦'}</div><div class="empty-txt">No ${lbl} photos yet.<br>Tap the button below to start.</div></div>`;
+  } else {
+    h+=`<div class="sec-title">${p.length} Photo${p.length!==1?'s':''} Captured</div>`;
+    h+=`<div class="thumb-grid">`;
+    p.forEach((ph,i)=>{h+=`<div class="thumb" onclick="openPD('${S.stage}',${i})"><div class="thumb-bg" style="background:linear-gradient(135deg,${ph.g[0]},${ph.g[1]});">💻</div><div class="thumb-x" onclick="event.stopPropagation();confirmDel('${S.stage}',${i})">×</div><div class="thumb-lbl">Photo ${i+1}</div></div>`;});
+    h+=`<div class="thumb-add" onclick="goToCamera()">+</div></div>`;
+  }
+  h+=`<button class="btn-pri" onclick="goToCamera()">📷 Take ${lbl} Photo</button>`;
+  h+=`<button class="btn-sec" onclick="toast('Gallery picker would open here — photo added')">🖼 Upload from Gallery</button>`;
+  h+=`<button class="btn-scan" onclick="goTo('qr')">📷 Scan New Order</button>`;
+  const el=document.getElementById('cap-ph-body');if(el)el.innerHTML=h;
+}
+
+function renderCaptureIPadLeft(){
+  const allP=PHOTOS[S.orderId];
+  const sp=allP[S.stage];
+  const lbl=stageLbl(S.stage);
+  const col=stageCol(S.stage);
+  const desc=stageDesc(S.stage);
+  let h='';
+  if(S.showSync)h+=`<div class="ipad-sync-ok">✅ Photo ${sp.length} synced to Acumatica successfully</div>`;
+  // Current stage card
+  h+=`<div class="panel-ttl">Current Stage</div>`;
+  h+=`<div class="sdc"><div class="sdc-ttl"><span style="width:9px;height:9px;border-radius:50%;background:${col};display:inline-block;flex-shrink:0;"></span>${lbl==='WIP'?'Work In Progress (WIP)':lbl}</div><div class="sdc-desc">${desc}</div><div class="sdc-stat" style="color:${sp.length?'var(--green)':'var(--amber)'};"}>● ${sp.length} photo${sp.length!==1?'s':''} captured${sp.length?' · Synced':' · Pending'}</div></div>`;
+  // All stage thumbnails
+  ['before','wip','after'].forEach(s=>{
+    const sp2=allP[s];
+    if(sp2.length){
+      h+=`<div class="panel-ttl" style="margin-top:6px;">${stageLbl(s)} — ${sp2.length} Photo${sp2.length!==1?'s':''}</div>`;
+      h+=`<div class="ip-thumb-grid">`;
+      sp2.forEach((ph,i)=>{h+=`<div class="ip-thumb" onclick="openIPadPD('${s}',${i})"><div class="ip-thumb-bg" style="background:linear-gradient(135deg,${ph.g[0]},${ph.g[1]});">💻</div><div class="ip-thumb-x" onclick="event.stopPropagation();confirmDel('${s}',${i},true)">×</div><div class="ip-thumb-lbl">Photo ${i+1}</div></div>`;});
+      if(s===S.stage)h+=`<div class="ipad-thumb-add" style="width:72px;height:72px;border-radius:8px;background:#f0f0f0;border:2px dashed #ccc;display:flex;align-items:center;justify-content:center;font-size:22px;color:#bbb;cursor:pointer;" onclick="shutterIPad()">+</div>`;
+      h+=`</div>`;
+    }
+  });
+  if(!sp.length){
+    h+=`<div class="panel-ttl" style="margin-top:6px;">Captured So Far</div>`;
+    h+=`<div class="empty-state" style="font-size:11px;"><div style="font-size:20px;margin-bottom:4px;">${S.stage==='wip'?'🔧':'📭'}</div><div class="empty-txt">No ${lbl} photos yet.<br>Tap the shutter to begin.</div></div>`;
+  }
+  // Capture log
+  h+=`<div class="panel-ttl" style="margin-top:6px;">Capture Log</div>`;
+  h+=`<div class="audit-card">`;
+  h+=`<div class="audit-row"><span class="audit-lbl">Before by</span><span class="audit-val">${allP.before.length?'John Tariq':'—'}</span></div>`;
+  h+=`<div class="audit-row"><span class="audit-lbl">Before on</span><span class="audit-val">${allP.before.length?'05 May, 9:14 AM':'—'}</span></div>`;
+  h+=`<div class="audit-row"><span class="audit-lbl">WIP photos</span><span class="audit-val" style="color:${allP.wip.length?'var(--green)':'var(--amber)'};">${allP.wip.length?allP.wip.length+' captured':'Pending'}</span></div>`;
+  h+=`<div class="audit-row"><span class="audit-lbl">After photos</span><span class="audit-val" style="color:${allP.after.length?'var(--green)':'var(--amber)'};">${allP.after.length?allP.after.length+' captured':'Pending'}</span></div>`;
+  h+=`<div class="audit-row"><span class="audit-lbl">Storage</span><span class="audit-val" style="color:var(--green);">✓ Acumatica (AWS)</span></div>`;
+  h+=`</div>`;
+  h+=`<div style="margin-top:10px;"><button style="width:100%;background:white;border:1.5px solid var(--blue);color:var(--blue);border-radius:8px;padding:9px;font-size:11.5px;font-weight:600;cursor:pointer;" onclick="toast('Gallery picker would open here')">🖼 Upload ${lbl} from Gallery</button></div>`;
+  const el=document.getElementById('cap-ip-left');if(el)el.innerHTML=h;
+}
+
+function updateIPadBadge(){
+  const b=document.getElementById('ip-stage-badge');if(!b)return;
+  const col=stageCol(S.stage);
+  const stageTxt=S.stage==='before'?'BEFORE':S.stage==='wip'?'WIP':'AFTER';
+  b.style.borderColor=col;b.style.color=col;
+  b.textContent=`● ${stageTxt} STAGE — ${S.orderId||'No Order'}`;
+}
+
+function switchStage(s){
+  S.stage=s;S.showSync=false;
+  renderCaptureTabs();renderCapturePhoneBody();renderCaptureIPadLeft();updateIPadBadge();
+}
+
+/* ============================================================
+   CAMERA (PHONE)
+============================================================ */
+function goToCamera(){
+  if(!S.orderId){toast('Load an order first');return;}
+  const n=PHOTOS[S.orderId][S.stage].length+1;
+  const sl=S.stage==='before'?'BEFORE':S.stage==='wip'?'WIP':'AFTER';
+  const sc=stageCol(S.stage);
+  document.getElementById('cam-badge').textContent=`● ${sl}`;
+  document.getElementById('cam-badge').style.background=sc;
+  document.getElementById('cam-so').textContent=S.orderId;
+  document.getElementById('cam-num').textContent=`Photo ${n}`;
+  document.getElementById('cam-info').textContent=`${S.orderId} · ${sl} · Photo ${n}`;
+  goTo('camera');
+}
+
+function shutterPhone(){
+  const f=document.getElementById('cam-flash');
+  f.classList.add('on');setTimeout(()=>f.classList.remove('on'),150);
+  addPhoto();
+  setTimeout(()=>{S.showSync=true;goTo('capture');},300);
+}
+
+function cancelCamera(){S.showSync=false;goTo('capture');}
+
+function shutterIPad(){
+  if(!S.orderId){toast('No order loaded');return;}
+  const f=document.getElementById('ip-flash');
+  if(f){f.classList.add('on');setTimeout(()=>f.classList.remove('on'),150);}
+  addPhoto();S.showSync=true;
+  setTimeout(()=>{renderCaptureTabs();renderCaptureIPadLeft();},200);
+}
+
+function addPhoto(){
+  const p=PHOTOS[S.orderId][S.stage];
+  p.push({g:GRADS[p.length%GRADS.length]});
+}
+
+/* ============================================================
+   PHOTO DETAIL (PHONE)
+============================================================ */
+function openPD(stage,index){
+  S.pdStage=stage;S.pdIndex=index;
+  renderPD();
+  goTo('pd');
+}
+
+function renderPD(){
+  if(!S.pdStage||!S.orderId)return;
+  const p=PHOTOS[S.orderId][S.pdStage];
+  const ph=p[S.pdIndex];if(!ph)return;
+  const lbl=stageLbl(S.pdStage);
+  document.getElementById('pd-title').textContent=`${lbl} — Photo ${S.pdIndex+1}`;
+  const img=document.getElementById('pd-img');
+  img.style.background=`linear-gradient(135deg,${ph.g[0]},${ph.g[1]})`;
+  img.innerHTML='💻';
+  document.getElementById('pd-meta').innerHTML=`
+    <div class="meta-row"><span class="meta-lbl">Stage</span><span class="meta-val">${lbl}</span></div>
+    <div class="meta-row"><span class="meta-lbl">Photo Number</span><span class="meta-val">Photo ${S.pdIndex+1} of ${p.length}</span></div>
+    <div class="meta-row"><span class="meta-lbl">Captured By</span><span class="meta-val">John Tariq</span></div>
+    <div class="meta-row"><span class="meta-lbl">Captured On</span><span class="meta-val">05 May 2026, 9:11 AM</span></div>
+    <div class="meta-row"><span class="meta-lbl">Device</span><span class="meta-val">iPhone 14 (Safari)</span></div>
+    <div class="meta-row"><span class="meta-lbl">GPS</span><span class="meta-val">29.5241° N, 98.4936° W</span></div>
+    <div class="meta-row"><span class="meta-lbl">Synced to Acumatica</span><span class="meta-val" style="color:var(--green);">✓ Yes</span></div>
+    <div class="notes-lbl">Notes (optional)</div>
+    <textarea class="notes-ta" placeholder="e.g. Cracked screen visible top-left corner…">Cracked screen, top-left corner.</textarea>
+    <div class="notes-hint">Notes saved to Acumatica and visible on the SO Pictures tab. Max 500 characters.</div>`;
+  document.getElementById('pd-del-btn').onclick=()=>confirmDel(S.pdStage,S.pdIndex,false,true);
+  document.getElementById('pd-ret-btn').onclick=()=>confirmRetake(S.pdStage,S.pdIndex);
+}
+
+function backFromPD(){S.showSync=false;goTo('capture');}
+
+/* ============================================================
+   PHOTO DETAIL (IPAD OVERLAY)
+============================================================ */
+function openIPadPD(stage,index){
+  S.pdStage=stage;S.pdIndex=index;
+  const p=PHOTOS[S.orderId][stage];const ph=p[index];if(!ph)return;
+  const lbl=stageLbl(stage);
+  document.getElementById('ip-pd-title').textContent=`${lbl} — Photo ${index+1}`;
+  const img=document.getElementById('ip-pd-img');
+  img.style.background=`linear-gradient(135deg,${ph.g[0]},${ph.g[1]})`;img.innerHTML='💻';
+  document.getElementById('ip-pd-meta').innerHTML=`
+    <div class="meta-row"><span class="meta-lbl">Stage</span><span class="meta-val">${lbl}</span></div>
+    <div class="meta-row"><span class="meta-lbl">Photo Number</span><span class="meta-val">Photo ${index+1} of ${p.length}</span></div>
+    <div class="meta-row"><span class="meta-lbl">Captured By</span><span class="meta-val">John Tariq</span></div>
+    <div class="meta-row"><span class="meta-lbl">Captured On</span><span class="meta-val">05 May 2026, 9:11 AM</span></div>
+    <div class="meta-row"><span class="meta-lbl">GPS</span><span class="meta-val">29.5241° N, 98.4936° W</span></div>
+    <div class="meta-row"><span class="meta-lbl">Synced</span><span class="meta-val" style="color:var(--green);">✓ Yes</span></div>
+    <div class="notes-lbl">Notes</div>
+    <textarea class="notes-ta" placeholder="Add a note…">Cracked screen, top-left corner.</textarea>`;
+  document.getElementById('ip-pd-del').onclick=()=>{closeIPadPD();confirmDel(stage,index,true);};
+  document.getElementById('ip-pd-ret').onclick=()=>{closeIPadPD();confirmRetake(stage,index,true);};
+  document.getElementById('ipad-pd-overlay').classList.add('on');
+}
+function closeIPadPD(){document.getElementById('ipad-pd-overlay').classList.remove('on');}
+
+/* ============================================================
+   DELETE / RETAKE
+============================================================ */
+function confirmDel(stage,index,isIPad=false,fromDetail=false){
+  const lbl=stageLbl(stage);
+  showModal({ico:'🗑',ttl:'Delete Photo?',msg:`Delete Photo ${index+1} (${lbl}) from Acumatica? This cannot be undone.`,
+    btnLbl:'Delete',btnCls:'red',cb:()=>{
+      PHOTOS[S.orderId][stage].splice(index,1);
+      S.showSync=false;
+      if(fromDetail)goTo('capture');
+      else{renderCaptureTabs();renderCapturePhoneBody();renderCaptureIPadLeft();}
+      toast('Photo deleted from Acumatica');
+    }});
+}
+
+function confirmRetake(stage,index,isIPad=false){
+  showModal({ico:'⚠️',ttl:'Delete and Retake?',
+    msg:'This will delete the current photo and open the camera. If you cancel without taking a new photo, the deletion cannot be undone.',
+    btnLbl:'Delete & Retake',btnCls:'orange',cb:()=>{
+      PHOTOS[S.orderId][stage].splice(index,1);
+      S.stage=stage;S.showSync=false;
+      if(isIPad){renderCaptureTabs();renderCaptureIPadLeft();toast('Photo deleted. Tap shutter to retake.');}
+      else{goTo('capture');setTimeout(()=>goToCamera(),100);}
+    }});
+}
+
+/* ============================================================
+   QR SCANNER
+============================================================ */
+function startQR(){
+  const b=document.getElementById('qr-badge');if(b)b.style.display='none';
+  S.qrTimer=setTimeout(()=>{
+    if(S.screen!=='qr')return;
+    if(b){b.style.display='block';}
+    setTimeout(()=>{
+      if(S.screen!=='qr')return;
+      S.orderId='SO004521';S.stage='wip';S.showSync=false;
+      goTo('capture');toast('QR Scanned: SO004521 loaded at WIP stage');
+    },700);
+  },2500);
+}
+function cancelQR(){
+  if(S.qrTimer){clearTimeout(S.qrTimer);S.qrTimer=null;}
+  const b=document.getElementById('qr-badge');if(b)b.style.display='none';
+  goTo(S.prevScreen==='qr'?'queue':S.prevScreen);
+}
+
+/* ============================================================
+   SEARCH
+============================================================ */
+function renderSearch(q){
+  doSearch(q,'srch-ph-results');
+  doSearch(q,'srch-ip-results');
+}
+
+function doSearch(q,targetId){
+  const el=document.getElementById(targetId);if(!el)return;
+  const res=q.length?ORDERS.filter(o=>o.id.toLowerCase().includes(q.toLowerCase())||o.cust.toLowerCase().includes(q.toLowerCase())):ORDERS;
+  if(!res.length){el.innerHTML=`<div style="text-align:center;padding:30px;"><div style="font-size:24px;margin-bottom:8px;">🔍</div><div style="font-size:11px;color:#999;">No orders found for "${q}"</div></div>`;return;}
+  let h=`<div class="sec-title" style="margin-bottom:8px;">${q?`Results for "${q}"`:'All Orders'} — ${res.length} found</div>`;
+  res.forEach(o=>{
+    h+=`<div class="q-item" onclick="openFromSearch('${o.id}')">
+      <div class="q-dot" style="background:${o.dot};"></div>
+      <div class="q-info"><div class="q-so">${o.id}</div><div class="q-cust">${o.cust}</div><div class="q-chips">${chips(o.id)}</div></div>
+      <div class="q-arr">›</div>
+    </div>`;
+  });
+  el.innerHTML=h;
+}
+
+function openFromSearch(id){
+  S.orderId=id;const p=PHOTOS[id];
+  S.stage=!p.before.length?'before':!p.wip.length?'wip':!p.after.length?'after':'before';
+  S.showSync=false;goTo('capture');
+}
+
+/* ============================================================
+   LOGIN / SIGN OUT
+============================================================ */
+function doLogin(){
+  const url=document.getElementById('p-url');
+  const usr=document.getElementById('p-user');
+  const pwd=document.getElementById('p-pass');
+  const err=document.getElementById('login-err');
+  if(url&&usr&&pwd&&(!url.value.trim()||!usr.value.trim()||!pwd.value.trim())){
+    if(err)err.style.display='block';return;
+  }
+  if(err)err.style.display='none';
+  goTo('queue');
+}
+
+function confirmSignOut(){
+  showModal({ico:'🚪',ttl:'Sign Out?',msg:'This will clear your active session and return to the login screen.',
+    btnLbl:'Sign Out',btnCls:'red',cb:()=>{
+      S.orderId=null;S.stage='before';S.showSync=false;goTo('login');
+    }});
+}
+
+/* ============================================================
+   ACUMATICA REFERENCE SCREEN
+============================================================ */
+function renderAcRef(){
+  const el=document.getElementById('acref-body');
+  if(!el||el.innerHTML.trim())return;
+  el.innerHTML=`<div style="font-family:'Segoe UI',Arial,sans-serif;font-size:13px;background:#f0f0f0;color:#222;min-width:900px;">
+  <div style="background:#1565c0;height:36px;display:flex;align-items:center;padding:0 10px;gap:8px;">
+    <span style="color:white;font-weight:700;font-size:14px;">Acumatica ERP</span>
+    <div style="display:flex;align-items:center;background:white;border-radius:3px;padding:3px 8px;gap:6px;width:240px;"><input style="border:none;outline:none;font-size:12px;color:#555;width:100%;" value="Sales Orders › SO004521 › Pictures"/></div>
+  </div>
+  <div style="background:white;">
+    <div style="padding:8px 16px 0;">
+      <div style="color:#1565c0;font-size:12px;cursor:pointer;">Sales Orders › SO004521</div>
+      <div style="font-size:18px;font-weight:600;color:#222;margin:3px 0 6px;">Sales Order: SO004521</div>
+    </div>
+    <div style="padding:4px 16px;border-bottom:1px solid #e0e0e0;display:flex;gap:4px;align-items:center;">
+      <span style="padding:4px 6px;font-size:15px;cursor:pointer;">💾</span>
+      <span style="padding:4px 6px;font-size:15px;cursor:pointer;">✏️</span>
+      <span style="padding:4px 6px;font-size:15px;cursor:pointer;">🗑</span>
+      <span style="padding:4px 6px;font-size:15px;cursor:pointer;">📋</span>
+    </div>
+    <div style="padding:10px 16px;border-bottom:1px solid #e8e8e8;display:grid;grid-template-columns:320px 1fr 310px;gap:8px;align-items:start;">
+      <div>
+        <div style="display:flex;margin-bottom:5px;gap:8px;"><span style="color:#555;font-size:12px;width:130px;flex-shrink:0;">Order Nbr.</span><span style="font-size:12.5px;border:1px solid #ccc;padding:2px 6px;border-radius:2px;flex:1;">SO004521</span></div>
+        <div style="display:flex;margin-bottom:5px;gap:8px;"><span style="color:#555;font-size:12px;width:130px;flex-shrink:0;">Customer</span><span style="font-size:12.5px;flex:1;color:#1565c0;cursor:pointer;">Riverside Electronics Service</span></div>
+        <div style="display:flex;margin-bottom:5px;gap:8px;"><span style="color:#555;font-size:12px;width:130px;flex-shrink:0;">Status</span><span><span style="background:#e3f2fd;color:#1565c0;border:1px solid #90caf9;padding:1px 10px;border-radius:10px;font-size:11.5px;">In Processing</span></span></div>
+        <div style="display:flex;margin-bottom:5px;gap:8px;"><span style="color:#555;font-size:12px;width:130px;flex-shrink:0;">Order Date</span><span style="font-size:12.5px;border:1px solid #ccc;padding:2px 6px;border-radius:2px;flex:1;">05/05/2026</span></div>
+      </div>
+      <div></div>
+      <div>
+        <div style="background:#e8f0fb;border:1px solid #c5d9f0;border-radius:4px;padding:10px 14px;margin-bottom:8px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:12px;"><span style="color:#444;">Order Total</span><span style="color:#222;font-weight:500;">$2,450.00</span></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:12px;"><span style="color:#444;">Tax</span><span style="color:#222;font-weight:500;">$196.00</span></div>
+          <div style="display:flex;justify-content:space-between;border-top:1px solid #90b4d8;padding-top:5px;margin-top:2px;font-weight:600;font-size:13px;"><span>Total</span><span>$2,646.00</span></div>
+        </div>
+        <div style="border:1px solid #c5d9f0;border-radius:4px;background:white;padding:10px 12px;display:flex;align-items:center;gap:12px;">
+          <svg width="72" height="72" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+            <rect fill="white" width="160" height="160"/>
+            <rect x="10" y="10" width="40" height="40" fill="#1565c0" rx="2"/><rect x="17" y="17" width="26" height="26" fill="white" rx="1"/><rect x="22" y="22" width="16" height="16" fill="#1565c0"/>
+            <rect x="110" y="10" width="40" height="40" fill="#1565c0" rx="2"/><rect x="117" y="17" width="26" height="26" fill="white" rx="1"/><rect x="122" y="22" width="16" height="16" fill="#1565c0"/>
+            <rect x="10" y="110" width="40" height="40" fill="#1565c0" rx="2"/><rect x="17" y="117" width="26" height="26" fill="white" rx="1"/><rect x="22" y="122" width="16" height="16" fill="#1565c0"/>
+            <rect x="60" y="10" width="6" height="6" fill="#1565c0"/><rect x="68" y="10" width="6" height="6" fill="#1565c0"/><rect x="76" y="18" width="6" height="6" fill="#1565c0"/>
+            <rect x="60" y="60" width="12" height="6" fill="#1565c0"/><rect x="76" y="60" width="6" height="12" fill="#1565c0"/>
+            <rect x="60" y="74" width="6" height="6" fill="#1565c0"/><rect x="68" y="74" width="6" height="6" fill="#1565c0"/>
+            <rect x="110" y="60" width="18" height="6" fill="#1565c0"/><rect x="132" y="60" width="18" height="6" fill="#1565c0"/>
+            <rect x="110" y="68" width="6" height="12" fill="#1565c0"/><rect x="132" y="68" width="6" height="12" fill="#1565c0"/>
+            <rect x="110" y="82" width="40" height="6" fill="#1565c0"/>
+            <rect x="60" y="110" width="6" height="18" fill="#1565c0"/><rect x="68" y="110" width="6" height="6" fill="#1565c0"/>
+            <rect x="68" y="120" width="12" height="6" fill="#1565c0"/><rect x="60" y="132" width="18" height="6" fill="#1565c0"/>
+            <rect x="82" y="110" width="6" height="6" fill="#1565c0"/><rect x="90" y="118" width="6" height="6" fill="#1565c0"/>
+          </svg>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:#1565c0;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Scan to Capture</div>
+            <div style="display:inline-block;background:#fff3e0;color:#e65100;border:1px solid #ffcc80;border-radius:10px;font-size:10px;font-weight:700;padding:1px 8px;margin-bottom:5px;">● WIP Stage Active</div>
+            <div style="font-size:10.5px;color:#666;line-height:1.4;">Point phone camera at this code to open the BMES Capture App at the active stage.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="border-bottom:1px solid #e0e0e0;padding:0 16px;display:flex;overflow-x:auto;">
+      ${['Details','Financial Details','Taxes','Shipping','Pictures','Documents'].map((t,i)=>`<div style="padding:8px 14px;font-size:12px;${i===4?'color:#1565c0;border-bottom:2px solid #1565c0;font-weight:600;':'color:#555;font-weight:500;'}cursor:pointer;white-space:nowrap;">${t}</div>`).join('')}
+    </div>
+    <div style="padding:0 16px 20px;">
+      <div style="display:flex;align-items:center;gap:4px;padding:6px 0;border-bottom:1px solid #e0e0e0;">
+        <span style="font-size:12px;font-weight:600;color:#333;flex:1;">Stage Photo Summary</span>
+        <button style="background:none;border:none;cursor:pointer;color:#1565c0;font-size:12px;padding:2px 6px;">+ Add Stage</button>
+      </div>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead><tr style="background:#fafafa;">
+          ${['▶','📎','Stage','Photos','Status','Last Captured By','Last Captured On'].map(h=>`<th style="text-align:left;font-size:11px;font-weight:600;color:#666;padding:6px 8px;border-bottom:1px solid #ddd;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;">${h}</th>`).join('')}
+        </tr></thead>
+        <tbody>
+          <tr style="background:#dce8fb;cursor:pointer;">
+            <td style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12px;">▶</td><td style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12px;">📎 3</td>
+            <td style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12.5px;font-weight:600;">Before</td><td style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12.5px;">3</td>
+            <td style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12.5px;"><span style="color:#2e7d32;font-weight:600;">Complete</span></td>
+            <td style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12.5px;">john.tariq</td><td style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12.5px;">05/05/2026 9:14 AM</td>
+          </tr>
+          <tr style="cursor:pointer;">
+            <td style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12px;">▶</td><td style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12px;">📎 0</td>
+            <td style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12.5px;font-weight:600;">WIP</td><td style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12.5px;">0</td>
+            <td style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12.5px;"><span style="color:#b45309;font-weight:600;">Pending</span></td>
+            <td style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12.5px;">—</td><td style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12.5px;">—</td>
+          </tr>
+          <tr style="cursor:pointer;">
+            <td style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12px;">▶</td><td style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12px;">📎 0</td>
+            <td style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12.5px;font-weight:600;">After</td><td style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12.5px;">0</td>
+            <td style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12.5px;"><span style="color:#b45309;font-weight:600;">Pending</span></td>
+            <td style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12.5px;">—</td><td style="padding:7px 8px;border-bottom:1px solid #eee;font-size:12.5px;">—</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="border-top:2px solid #1565c0;margin-top:0;">
+        <div style="display:flex;align-items:center;gap:4px;padding:5px 0;border-bottom:1px solid #e0e0e0;">
+          <span style="font-size:12px;font-weight:600;color:#333;flex:1;">Before — Photo Detail</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table style="border-collapse:collapse;min-width:1100px;width:100%;">
+            <thead><tr style="background:#fafafa;">
+              ${['Photo #','File Name','File Size','Captured By','Captured On','Device','GPS Lat','GPS Long','Sync Status','Notes ✎','View'].map(h=>`<th style="text-align:left;font-size:10.5px;font-weight:700;color:#666;padding:5px 8px;border-bottom:1px solid #ddd;background:#fafafa;text-transform:uppercase;letter-spacing:.03em;white-space:nowrap;">${h}</th>`).join('')}
+            </tr></thead>
+            <tbody>
+              ${[
+                ['Photo 1','SO004521_B_001.jpg','287 KB','john.tariq','05/05/2026 9:11 AM','iPhone 14 (Safari)','29.5241° N','98.4936° W','✓ Synced','Cracked screen, top-left.'],
+                ['Photo 2','SO004521_B_002.jpg','312 KB','john.tariq','05/05/2026 9:12 AM','iPhone 14 (Safari)','29.5241° N','98.4936° W','✓ Synced',''],
+                ['Photo 3','SO004521_B_003.jpg','298 KB','john.tariq','05/05/2026 9:14 AM','iPhone 14 (Safari)','29.5241° N','98.4936° W','✓ Synced',''],
+              ].map(row=>`<tr>${row.map((cell,i)=>{
+                if(i===9)return `<td style="padding:6px 8px;border-bottom:1px solid #eee;font-size:11.5px;"><input style="width:160px;border:1px solid #ccc;border-radius:2px;padding:2px 5px;font-size:11px;font-family:inherit;" value="${cell}"/></td>`;
+                if(i===10)return `<td style="padding:6px 8px;border-bottom:1px solid #eee;font-size:11.5px;"><a href="#" style="color:#1565c0;text-decoration:none;" onclick="return false;">View →</a></td>`;
+                return `<td style="padding:6px 8px;border-bottom:1px solid #eee;font-size:11.5px;"><span style="display:inline-block;background:#f5f5f5;border:1px solid #e0e0e0;border-radius:2px;padding:2px 6px;color:#444;white-space:nowrap;">${cell||'—'}</span></td>`;
+              }).join('')}</tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`;
+}
+
+/* ============================================================
+   MODAL
+============================================================ */
+function showModal(cfg){
+  document.getElementById('m-ico').textContent=cfg.ico||'⚠️';
+  document.getElementById('m-ttl').textContent=cfg.ttl||'Confirm';
+  document.getElementById('m-msg').textContent=cfg.msg||'';
+  const btn=document.getElementById('m-confirm');
+  btn.textContent=cfg.btnLbl||'Confirm';
+  btn.className=`modal-confirm ${cfg.btnCls||'blue'}`;
+  S.modalCb=cfg.cb;
+  document.getElementById('modal-overlay').classList.add('on');
+}
+function hideModal(){document.getElementById('modal-overlay').classList.remove('on');S.modalCb=null;}
+function execModal(){hideModal();if(S.modalCb)S.modalCb();}
+
+/* ============================================================
+   TOAST
+============================================================ */
+let toastTmr=null;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('on');
+  if(toastTmr)clearTimeout(toastTmr);
+  toastTmr=setTimeout(()=>el.classList.remove('on'),2600);
+}
+
+/* ============================================================
+   HELPERS
+============================================================ */
+function stageLbl(s){return s==='before'?'Before':s==='wip'?'WIP':'After';}
+function stageCol(s){return s==='before'?'#1565c0':s==='wip'?'#ff9800':'#2e7d32';}
+function stageDesc(s){
+  if(s==='before')return 'Capture the device as received. Show all visible damage, scratches, or defects.';
+  if(s==='wip')return 'Capture the device during active repair. Show disassembly, internal components, or corrosion if present.';
+  return 'Capture the device ready for return. Show repaired condition and confirm the issue has been resolved.';
+}
+function logoSVG(c,w,h,tag=false){
+  return `<svg width="${w}" height="${h}" viewBox="0 0 200 65" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="2" width="44" height="44" rx="8" fill="none" stroke="${c}" stroke-width="3.5"/>
+    <polyline points="6,24 13,24 17,10 22,38 27,18 31,28 35,14 40,24 48,24" fill="none" stroke="${c}" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="58" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="30" fill="${c}">BMES</text>
+    ${tag?`<text x="58" y="50" font-family="Arial" font-style="italic" font-size="11.5" fill="${c==='white'?'rgba(255,255,255,.7)':c}" letter-spacing="1.2">BEYOND THE EXPECTED®</text>`:''}
+  </svg>`;
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+window.addEventListener('DOMContentLoaded',()=>{
+  detectMode();
+  renderSearch('');
+});
+</script>
+</body>
+</html>
