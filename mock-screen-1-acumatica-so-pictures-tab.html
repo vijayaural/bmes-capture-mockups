@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Acumatica - SO004521 - Pictures Tab</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Segoe UI',Arial,sans-serif; font-size:13px; background:#f0f0f0; color:#222; }
+
+.top-nav { background:#1565c0; height:36px; display:flex; align-items:center; padding:0 10px; gap:8px; }
+.search-bar { display:flex; align-items:center; background:white; border-radius:3px; padding:3px 8px; gap:6px; width:220px; }
+.search-bar input { border:none; outline:none; font-size:12px; color:#555; width:100%; background:transparent; }
+
+.content { background:white; min-height:calc(100vh - 36px); }
+.page-header { padding:8px 16px 0 16px; }
+.breadcrumb { color:#1565c0; font-size:12px; cursor:pointer; }
+.page-title { font-size:17px; font-weight:600; color:#222; margin:2px 0 6px 0; }
+
+.toolbar { display:flex; align-items:center; padding:4px 16px; gap:2px; border-bottom:1px solid #e0e0e0; }
+.tb-btn { background:none; border:none; cursor:pointer; padding:4px 6px; color:#444; font-size:15px; border-radius:3px; }
+.tb-btn:hover { background:#e8f0fe; }
+.tb-sep { width:1px; height:18px; background:#ddd; margin:0 4px; }
+
+.form-header { display:grid; grid-template-columns:320px 1fr 310px; padding:10px 16px; border-bottom:1px solid #e8e8e8; align-items:start; }
+.form-panel { padding-right:20px; }
+.form-row { display:flex; align-items:flex-start; margin-bottom:6px; gap:8px; }
+.form-label { color:#555; font-size:12px; width:130px; flex-shrink:0; padding-top:3px; }
+.form-value { font-size:12.5px; color:#222; flex:1; border:1px solid #ccc; padding:2px 6px; border-radius:2px; min-height:22px; background:white; }
+.form-value.link { color:#1565c0; cursor:pointer; border:none; background:transparent; padding:2px 0; }
+.status-badge { display:inline-block; background:#e3f2fd; color:#1565c0; border:1px solid #90caf9; padding:1px 10px; border-radius:10px; font-size:11.5px; font-weight:500; }
+
+.right-panel { display:flex; flex-direction:column; gap:10px; }
+.totals-panel { background:#e8f0fb; border:1px solid #c5d9f0; border-radius:4px; padding:10px 14px; }
+.totals-row { display:flex; justify-content:space-between; margin-bottom:5px; font-size:12px; }
+.totals-row.total { border-top:1px solid #90b4d8; margin-top:6px; padding-top:6px; font-weight:600; font-size:13px; }
+.tl { color:#444; } .tv { color:#222; font-weight:500; }
+.qr-widget { border:1px solid #c5d9f0; border-radius:4px; background:white; padding:10px 12px; display:flex; align-items:center; gap:12px; }
+.qr-right { flex:1; }
+.qr-title { font-size:11px; font-weight:700; color:#1565c0; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px; }
+.qr-chip { display:inline-block; background:#fff3e0; color:#e65100; border:1px solid #ffcc80; border-radius:10px; font-size:10px; font-weight:700; padding:1px 8px; margin-bottom:5px; }
+.qr-inst { font-size:10.5px; color:#666; line-height:1.45; margin-bottom:5px; }
+.qr-url { font-size:9.5px; color:#999; font-family:monospace; background:#f5f5f5; padding:3px 6px; border-radius:2px; word-break:break-all; }
+
+.tabs-row { border-bottom:1px solid #e0e0e0; padding:0 16px; display:flex; overflow-x:auto; }
+.tab { padding:8px 14px; font-size:12px; color:#555; cursor:pointer; white-space:nowrap; border-bottom:2px solid transparent; font-weight:500; letter-spacing:0.02em; }
+.tab:hover { color:#1565c0; }
+.tab.active { color:#1565c0; border-bottom-color:#1565c0; }
+
+.pictures-area { padding:0 16px 20px; }
+
+.grid-panel-header { display:flex; align-items:center; gap:4px; padding:5px 0; border-bottom:1px solid #e0e0e0; }
+.grid-panel-label { font-size:12px; font-weight:600; color:#333; flex:1; }
+.g-icon { background:none; border:none; cursor:pointer; padding:2px 5px; color:#666; font-size:13px; border-radius:3px; }
+.g-icon:hover { background:#e8f0fe; color:#1565c0; }
+
+/* MASTER GRID */
+.master-grid { width:100%; border-collapse:collapse; }
+.master-grid th { text-align:left; font-size:11px; font-weight:600; color:#666; padding:6px 8px; border-bottom:1px solid #ddd; background:#fafafa; text-transform:uppercase; letter-spacing:0.03em; white-space:nowrap; }
+.master-grid td { padding:7px 8px; border-bottom:1px solid #eee; font-size:12.5px; vertical-align:middle; cursor:pointer; }
+.master-grid tr.data-row:hover td { background:#f5f9ff; }
+.master-grid tr.data-row.selected td { background:#dce8fb; }
+
+/* DETAIL SECTION */
+.detail-section { border-top:2px solid #1565c0; }
+
+/* DETAIL GRID — horizontally scrollable to fit all metadata columns */
+.detail-scroll { overflow-x:auto; }
+.detail-grid { width:100%; border-collapse:collapse; min-width:1100px; }
+.detail-grid th {
+  text-align:left; font-size:10.5px; font-weight:700; color:#666;
+  padding:5px 8px; border-bottom:1px solid #ddd; background:#fafafa;
+  text-transform:uppercase; letter-spacing:0.03em; white-space:nowrap;
+}
+/* Read-only column header indicator */
+.detail-grid th.ro::after {
+  content:' 🔒';
+  font-size:9px;
+  opacity:0.5;
+}
+.detail-grid th.editable { color:#1565c0; }
+.detail-grid th.editable::after { content:' ✎'; font-size:10px; }
+
+.detail-grid td { padding:6px 8px; border-bottom:1px solid #eee; font-size:11.5px; vertical-align:middle; }
+.detail-grid tr:hover td { background:#f5f9ff; }
+
+/* Read-only field style — greyed background like Acumatica read-only inputs */
+.ro-field {
+  display:inline-block;
+  background:#f5f5f5;
+  border:1px solid #e0e0e0;
+  border-radius:2px;
+  padding:2px 6px;
+  font-size:11.5px;
+  color:#444;
+  white-space:nowrap;
+  min-width:60px;
+}
+.notes-field {
+  width:100%; border:1px solid #ccc; border-radius:2px;
+  padding:3px 6px; font-size:11.5px; color:#333; font-family:inherit;
+  background:white;
+}
+.notes-field:focus { border-color:#1565c0; outline:none; }
+
+/* Badges */
+.stage-label { font-weight:700; color:#333; font-size:12.5px; }
+.count-badge { display:inline-flex; align-items:center; justify-content:center; background:#1565c0; color:white; border-radius:10px; min-width:24px; height:20px; font-size:11.5px; font-weight:700; padding:0 7px; }
+.count-badge.zero { background:#bdbdbd; }
+.status-ok { color:#2e7d32; font-weight:700; font-size:12px; }
+.status-pend { color:#b45309; font-weight:600; font-size:12px; }
+.na { color:#aaa; font-size:12px; }
+.clip-wrap { position:relative; display:inline-block; cursor:pointer; font-size:13px; }
+.clip-badge { position:absolute; top:-5px; right:-8px; background:#1565c0; color:white; border-radius:7px; font-size:9px; padding:0 3px; font-weight:700; }
+.synced-chip { display:inline-block; background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; border-radius:7px; font-size:10.5px; font-weight:700; padding:1px 7px; }
+.view-link { color:#1565c0; font-size:11.5px; cursor:pointer; }
+.view-link:hover { text-decoration:underline; }
+.photo-num { font-weight:700; color:#333; }
+
+/* Legend */
+.legend {
+  display:flex; align-items:center; gap:16px;
+  padding:6px 0 2px;
+  font-size:11px; color:#777;
+}
+.legend-item { display:flex; align-items:center; gap:5px; }
+
+.detail-empty { padding:24px 16px; text-align:center; color:#aaa; font-size:12px; border-bottom:1px solid #eee; }
+.detail-empty-icon { font-size:26px; margin-bottom:6px; }
+.detail-empty-text { line-height:1.6; }
+
+.info-note { font-size:11.5px; color:#888; padding:10px 0 0 0; font-style:italic; }
+</style>
+</head>
+<body>
+
+<div class="top-nav">
+  <div class="search-bar">
+    <span style="color:#1565c0;font-size:14px;">🔍</span>
+    <input type="text" placeholder="Search...">
+  </div>
+  <span style="color:white;font-size:16px;margin-left:4px;">🕐</span>
+</div>
+
+<div class="content">
+  <div class="page-header">
+    <div class="breadcrumb">Sales Orders</div>
+    <div class="page-title">SO SO004521 &nbsp;–&nbsp; Riverside Electronics Service</div>
+  </div>
+
+  <div class="toolbar">
+    <button class="tb-btn">&#8592;</button>
+    <button class="tb-btn">💾</button>
+    <button class="tb-btn">🖨</button>
+    <button class="tb-btn">↩</button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn">&#43;</button>
+    <button class="tb-btn">🗑</button>
+    <button class="tb-btn">&#128203;&#9660;</button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn">&#124;&#8592;</button>
+    <button class="tb-btn">&#8592;</button>
+    <button class="tb-btn">&#8594;</button>
+    <button class="tb-btn">&#8594;&#124;</button>
+    <button class="tb-btn">&#8943;</button>
+  </div>
+
+  <div class="form-header">
+    <div class="form-panel">
+      <div class="form-row"><span class="form-label">Order Type</span><div class="form-value" style="display:flex;align-items:center;gap:4px;">SO <span style="color:#1565c0;font-size:11px;">&#128269;</span></div></div>
+      <div class="form-row"><span class="form-label">Order Nbr.</span><div class="form-value" style="display:flex;align-items:center;gap:4px;">SO004521 <span style="color:#1565c0;font-size:11px;">&#128269;</span></div></div>
+      <div class="form-row"><span class="form-label">Status</span><div class="form-value" style="border:none;background:transparent;padding:2px 0;"><span class="status-badge">In Processing</span></div></div>
+      <div class="form-row"><span class="form-label">Date</span><div class="form-value">05/05/2026</div></div>
+      <div class="form-row"><span class="form-label">Requested On</span><div class="form-value">05/05/2026</div></div>
+      <div class="form-row"><span class="form-label">Customer Order Nbr.</span><div class="form-value">RIVSIDE-2026-0441</div></div>
+    </div>
+    <div class="form-panel">
+      <div class="form-row"><span class="form-label">Customer</span><div class="form-value link">RIVSIDE – Riverside Electronics Service</div></div>
+      <div class="form-row"><span class="form-label">Location</span><div class="form-value link">MAIN – Primary Location</div></div>
+      <div class="form-row"><span class="form-label">Contact</span><div class="form-value">Mark Thornton</div></div>
+      <div class="form-row"><span class="form-label">Currency</span><div class="form-value" style="display:flex;align-items:center;gap:6px;">USD <input type="text" value="1" style="width:28px;border:1px solid #ccc;padding:1px 4px;border-radius:2px;font-size:12px;"> <span style="color:#1565c0;font-size:11.5px;cursor:pointer;">View Base</span></div></div>
+      <div class="form-row"><span class="form-label">Description</span><div class="form-value">Laptop Screen Replacement &amp; Motherboard Repair</div></div>
+    </div>
+    <div class="right-panel">
+      <div class="totals-panel">
+        <div class="totals-row"><span class="tl">Ordered Qty.</span><span class="tv">2.00</span></div>
+        <div class="totals-row"><span class="tl">Detail Total</span><span class="tv">845.00</span></div>
+        <div class="totals-row"><span class="tl">Line Discounts</span><span class="tv">0.00</span></div>
+        <div class="totals-row"><span class="tl">Document Discounts</span><span class="tv">0.00</span></div>
+        <div class="totals-row"><span class="tl">Freight Total</span><span class="tv">0.00</span></div>
+        <div class="totals-row"><span class="tl">Tax Total</span><span class="tv">0.00</span></div>
+        <div class="totals-row total"><span class="tl">Order Total</span><span class="tv">845.00</span></div>
+      </div>
+      <div class="qr-widget">
+        <div style="flex-shrink:0;">
+          <svg width="88" height="88" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+            <rect width="160" height="160" fill="white"/>
+            <rect x="10" y="10" width="40" height="40" fill="#111" rx="2"/><rect x="16" y="16" width="28" height="28" fill="white"/><rect x="22" y="22" width="16" height="16" fill="#111"/>
+            <rect x="110" y="10" width="40" height="40" fill="#111" rx="2"/><rect x="116" y="16" width="28" height="28" fill="white"/><rect x="122" y="22" width="16" height="16" fill="#111"/>
+            <rect x="10" y="110" width="40" height="40" fill="#111" rx="2"/><rect x="16" y="116" width="28" height="28" fill="white"/><rect x="22" y="122" width="16" height="16" fill="#111"/>
+            <rect x="56" y="10" width="6" height="6" fill="#111"/><rect x="68" y="10" width="6" height="6" fill="#111"/><rect x="80" y="10" width="6" height="6" fill="#111"/><rect x="92" y="10" width="6" height="6" fill="#111"/>
+            <rect x="56" y="56" width="6" height="6" fill="#111"/><rect x="68" y="56" width="6" height="6" fill="#111"/><rect x="86" y="56" width="6" height="6" fill="#111"/><rect x="104" y="56" width="6" height="6" fill="#111"/>
+            <rect x="56" y="68" width="6" height="6" fill="#111"/><rect x="74" y="68" width="6" height="6" fill="#111"/><rect x="92" y="68" width="6" height="6" fill="#111"/><rect x="110" y="68" width="6" height="6" fill="#111"/>
+            <rect x="56" y="80" width="6" height="6" fill="#111"/><rect x="68" y="80" width="6" height="6" fill="#111"/><rect x="80" y="80" width="6" height="6" fill="#111"/><rect x="98" y="80" width="6" height="6" fill="#111"/>
+            <rect x="62" y="62" width="6" height="6" fill="#111"/><rect x="80" y="62" width="6" height="6" fill="#111"/><rect x="116" y="56" width="6" height="6" fill="#111"/>
+            <rect x="62" y="74" width="6" height="6" fill="#111"/><rect x="86" y="74" width="6" height="6" fill="#111"/><rect x="104" y="74" width="6" height="6" fill="#111"/>
+            <rect x="62" y="86" width="6" height="6" fill="#111"/><rect x="74" y="86" width="6" height="6" fill="#111"/><rect x="92" y="86" width="6" height="6" fill="#111"/>
+            <rect x="56" y="92" width="6" height="6" fill="#111"/><rect x="80" y="92" width="6" height="6" fill="#111"/><rect x="104" y="92" width="6" height="6" fill="#111"/>
+            <rect x="68" y="98" width="6" height="6" fill="#111"/><rect x="86" y="98" width="6" height="6" fill="#111"/>
+            <rect x="56" y="104" width="6" height="6" fill="#111"/><rect x="74" y="104" width="6" height="6" fill="#111"/>
+            <rect x="104" y="104" width="18" height="18" fill="#111" rx="1"/><rect x="108" y="108" width="10" height="10" fill="white"/><rect x="111" y="111" width="4" height="4" fill="#111"/>
+          </svg>
+        </div>
+        <div class="qr-right">
+          <div class="qr-title">&#9638; Scan to Capture</div>
+          <div class="qr-chip">&#9679; WIP Stage Active</div>
+          <div class="qr-inst">Point any phone or tablet at this code. Opens the capture app on this order with the correct stage pre-selected.</div>
+          <div class="qr-url">capture.bmes-apps.com/so?order=SO004521&stage=wip</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs-row">
+    <div class="tab">DETAILS</div><div class="tab">TAXES</div><div class="tab">COMMISSIONS</div>
+    <div class="tab">FINANCIAL</div><div class="tab">SHIPPING</div><div class="tab">ADDRESSES</div>
+    <div class="tab">DISCOUNTS</div><div class="tab">SHIPMENTS</div><div class="tab">PAYMENTS</div>
+    <div class="tab">RELATIONS</div><div class="tab">TOTALS</div>
+    <div class="tab active">PICTURES</div>
+  </div>
+
+  <div class="pictures-area">
+
+    <!-- TOP GRID TOOLBAR -->
+    <div class="grid-panel-header">
+      <span class="grid-panel-label">Capture Stages</span>
+      <button class="g-icon">&#8635;</button>
+      <button class="g-icon">&#8596;</button>
+      <button class="g-icon">&#128936;</button>
+    </div>
+
+    <!-- TOP MASTER GRID -->
+    <table class="master-grid">
+      <thead>
+        <tr>
+          <th style="width:22px;"></th>
+          <th style="width:30px;">&#128204;</th>
+          <th style="width:24px;"></th>
+          <th style="width:110px;">STAGE</th>
+          <th style="width:90px;">PHOTOS</th>
+          <th style="width:130px;">STATUS</th>
+          <th style="width:200px;">LAST CAPTURED BY</th>
+          <th>LAST CAPTURED ON</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="data-row selected" onclick="selectStage('before',this)">
+          <td style="color:#888;font-size:12px;text-align:center;">&#9654;</td>
+          <td><span class="clip-wrap">📎<span class="clip-badge">3</span></span></td>
+          <td style="color:#888;font-size:12px;text-align:center;">&#128196;</td>
+          <td><span class="stage-label">Before</span></td>
+          <td><span class="count-badge">3</span></td>
+          <td><span class="status-ok">&#10003; Complete</span></td>
+          <td style="font-size:12px;color:#444;">John Tariq</td>
+          <td style="font-size:12px;color:#555;">05 May 2026, 9:14 AM</td>
+        </tr>
+        <tr class="data-row" onclick="selectStage('wip',this)">
+          <td style="color:#888;font-size:12px;text-align:center;">&#9654;</td>
+          <td><span class="clip-wrap" style="color:#ccc;">📎</span></td>
+          <td style="color:#888;font-size:12px;text-align:center;">&#128196;</td>
+          <td><span class="stage-label">WIP</span></td>
+          <td><span class="count-badge zero">0</span></td>
+          <td><span class="status-pend">&#9679; Pending</span></td>
+          <td class="na">—</td>
+          <td class="na">—</td>
+        </tr>
+        <tr class="data-row" onclick="selectStage('after',this)">
+          <td style="color:#888;font-size:12px;text-align:center;">&#9654;</td>
+          <td><span class="clip-wrap" style="color:#ccc;">📎</span></td>
+          <td style="color:#888;font-size:12px;text-align:center;">&#128196;</td>
+          <td><span class="stage-label">After</span></td>
+          <td><span class="count-badge zero">0</span></td>
+          <td><span class="status-pend">&#9679; Pending</span></td>
+          <td class="na">—</td>
+          <td class="na">—</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- DETAIL SECTION -->
+    <div class="detail-section">
+
+      <!-- Detail toolbar -->
+      <div class="grid-panel-header" style="margin-top:0;">
+        <span class="grid-panel-label" id="detail-label">Before &nbsp;—&nbsp; Photo Details</span>
+        <button class="g-icon">&#8635;</button>
+        <button class="g-icon">&#8596;</button>
+        <button class="g-icon">&#128936;</button>
+      </div>
+
+      <!-- Legend -->
+      <div class="legend">
+        <div class="legend-item">
+          <span style="background:#f5f5f5;border:1px solid #e0e0e0;border-radius:2px;padding:1px 6px;font-size:10px;color:#666;">Field</span>
+          <span>Read-only (system generated)</span>
+        </div>
+        <div class="legend-item">
+          <span style="background:white;border:1px solid #ccc;border-radius:2px;padding:1px 6px;font-size:10px;color:#333;">Field</span>
+          <span>Editable</span>
+        </div>
+      </div>
+
+      <!-- BEFORE DETAIL -->
+      <div id="detail-before">
+        <div class="detail-scroll">
+          <table class="detail-grid">
+            <thead>
+              <tr>
+                <th class="ro" style="width:75px;">PHOTO #</th>
+                <th class="ro" style="width:130px;">FILE NAME</th>
+                <th class="ro" style="width:80px;">FILE SIZE</th>
+                <th class="ro" style="width:130px;">CAPTURED BY</th>
+                <th class="ro" style="width:160px;">CAPTURED ON</th>
+                <th class="ro" style="width:130px;">DEVICE</th>
+                <th class="ro" style="width:90px;">SYNC STATUS</th>
+                <th class="editable" style="min-width:220px;">NOTES</th>
+                <th style="width:55px;">VIEW</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="ro-field">Photo 1</span></td>
+                <td><span class="ro-field" style="font-size:10.5px;">SO004521_B_001.jpg</span></td>
+                <td><span class="ro-field">2.4 MB</span></td>
+                <td><span class="ro-field">John Tariq</span></td>
+                <td><span class="ro-field" style="font-size:10.5px;">05 May 2026, 9:08 AM</span></td>
+                <td><span class="ro-field" style="font-size:10.5px;">iPhone 14 (Safari)</span></td>
+                <td><span class="synced-chip">&#10003; Synced</span></td>
+                <td><input type="text" class="notes-field" value="Cracked screen, top-left corner." placeholder="Add note..."></td>
+                <td><a class="view-link">View ›</a></td>
+              </tr>
+              <tr>
+                <td><span class="ro-field">Photo 2</span></td>
+                <td><span class="ro-field" style="font-size:10.5px;">SO004521_B_002.jpg</span></td>
+                <td><span class="ro-field">1.8 MB</span></td>
+                <td><span class="ro-field">John Tariq</span></td>
+                <td><span class="ro-field" style="font-size:10.5px;">05 May 2026, 9:11 AM</span></td>
+                <td><span class="ro-field" style="font-size:10.5px;">iPhone 14 (Safari)</span></td>
+                <td><span class="synced-chip">&#10003; Synced</span></td>
+                <td><input type="text" class="notes-field" value="Rear casing dented near USB port." placeholder="Add note..."></td>
+                <td><a class="view-link">View ›</a></td>
+              </tr>
+              <tr>
+                <td><span class="ro-field">Photo 3</span></td>
+                <td><span class="ro-field" style="font-size:10.5px;">SO004521_B_003.jpg</span></td>
+                <td><span class="ro-field">2.1 MB</span></td>
+                <td><span class="ro-field">John Tariq</span></td>
+                <td><span class="ro-field" style="font-size:10.5px;">05 May 2026, 9:14 AM</span></td>
+                <td><span class="ro-field" style="font-size:10.5px;">iPhone 14 (Safari)</span></td>
+                <td><span class="synced-chip">&#10003; Synced</span></td>
+                <td><input type="text" class="notes-field" value="" placeholder="Add note..."></td>
+                <td><a class="view-link">View ›</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- WIP DETAIL -->
+      <div id="detail-wip" style="display:none;">
+        <div class="detail-empty">
+          <div class="detail-empty-icon">📭</div>
+          <div class="detail-empty-text">No WIP photos captured yet.<br>Scan the QR code in the header from any phone or tablet to open the capture app and add WIP photos.</div>
+        </div>
+      </div>
+
+      <!-- AFTER DETAIL -->
+      <div id="detail-after" style="display:none;">
+        <div class="detail-empty">
+          <div class="detail-empty-icon">📭</div>
+          <div class="detail-empty-text">No After photos captured yet.<br>Scan the QR code in the header from any phone or tablet to open the capture app and add After photos.</div>
+        </div>
+      </div>
+
+    </div><!-- end detail-section -->
+
+    <div class="info-note">
+      Click a stage row above to view its photo details below. Fields shown with a grey background are read-only and system generated. Notes is the only editable field and is saved directly to Acumatica on edit. File names follow the convention: SO Number _ Stage Initial _ Photo Sequence.
+    </div>
+
+  </div>
+</div>
+
+<script>
+const labels = {
+  before:'Before \u2014 Photo Details',
+  wip:'WIP \u2014 Photo Details',
+  after:'After \u2014 Photo Details'
+};
+function selectStage(stage, row) {
+  document.querySelectorAll('.data-row').forEach(r => r.classList.remove('selected'));
+  row.classList.add('selected');
+  ['before','wip','after'].forEach(s => {
+    document.getElementById('detail-'+s).style.display = (s===stage) ? '' : 'none';
+  });
+  document.getElementById('detail-label').textContent = labels[stage];
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BMES Capture App — Data Flow Diagram</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Segoe UI',Arial,sans-serif; background:#0d1117; color:#e6edf3; min-height:100vh; padding:32px 24px 48px; }
+.page-header { text-align:center; margin-bottom:36px; }
+.page-header h1 { font-size:22px; font-weight:700; color:#ffffff; letter-spacing:0.02em; margin-bottom:6px; }
+.page-header p { font-size:13px; color:#8b949e; }
+.bmes-tag { display:inline-block; background:#1565c0; color:white; font-size:11px; font-weight:700; padding:3px 12px; border-radius:12px; margin-bottom:10px; letter-spacing:0.06em; text-transform:uppercase; }
+.diagram-outer { max-width:1320px; margin:0 auto; }
+.lane-headers { display:grid; grid-template-columns:180px 1fr 1fr 1fr 1fr; margin-bottom:0; }
+.lane-header { padding:12px 16px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; text-align:center; border-radius:8px 8px 0 0; border:1px solid transparent; }
+.lh-step { background:#161b22; color:#8b949e; border-color:#30363d; }
+.lh-user { background:#1a2744; color:#79c0ff; border-color:#1565c0; }
+.lh-app  { background:#1a2e1a; color:#56d364; border-color:#2ea043; }
+.lh-acu  { background:#2d1b00; color:#f0a732; border-color:#d29922; }
+.lh-ext  { background:#2d0d2d; color:#d2a8ff; border-color:#8957e5; }
+.lane-body { display:grid; grid-template-columns:180px 1fr 1fr 1fr 1fr; border:1px solid #30363d; border-top:none; border-radius:0 0 12px 12px; overflow:hidden; }
+.lc { border-right:1px solid #21262d; }
+.lc:last-child { border-right:none; }
+.lc.steps { background:#0d1117; }
+.lc.user  { background:#0e1629; }
+.lc.app   { background:#0e1a0e; }
+.lc.acu   { background:#1a1200; }
+.lc.ext   { background:#160d1a; }
+.fc { min-height:88px; border-bottom:1px solid #21262d; padding:10px 8px; display:flex; align-items:center; justify-content:center; }
+.fc:last-child { border-bottom:none; }
+.sc { flex-direction:column; gap:4px; }
+.sn { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:800; cursor:pointer; transition:transform 0.15s; flex-shrink:0; }
+.sn:hover { transform:scale(1.2); }
+.sn-b { background:#1565c0; color:white; box-shadow:0 2px 8px rgba(21,101,192,0.5); }
+.sn-g { background:#2ea043; color:white; box-shadow:0 2px 8px rgba(46,160,67,0.5); }
+.sn-a { background:#d29922; color:#0d1117; box-shadow:0 2px 8px rgba(210,153,34,0.5); }
+.sn-p { background:#8957e5; color:white; box-shadow:0 2px 8px rgba(137,87,229,0.5); }
+.sd { font-size:10px; color:#8b949e; text-align:center; line-height:1.3; }
+.ab { border-radius:8px; padding:9px 10px; width:100%; cursor:pointer; transition:transform 0.1s; }
+.ab:hover { transform:translateY(-1px); }
+.ab-b { background:#1a2744; border:1.5px solid #1565c0; }
+.ab-g { background:#1a2e1a; border:1.5px solid #2ea043; }
+.ab-a { background:#2d1b00; border:1.5px solid #d29922; }
+.ab-p { background:#200d2d; border:1.5px solid #8957e5; }
+.at { font-size:11px; font-weight:700; margin-bottom:3px; line-height:1.3; }
+.at-b { color:#79c0ff; } .at-g { color:#56d364; } .at-a { color:#f0a732; } .at-p { color:#d2a8ff; }
+.ad { font-size:10px; color:#8b949e; line-height:1.35; }
+.legend { display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:20px; padding:14px; background:#161b22; border-radius:10px; border:1px solid #30363d; }
+.li { display:flex; align-items:center; gap:6px; font-size:11.5px; color:#8b949e; }
+.ld { width:12px; height:12px; border-radius:3px; flex-shrink:0; }
+.callout { background:#1a2744; border-left:4px solid #1565c0; border-radius:0 8px 8px 0; padding:12px 16px; margin-top:20px; font-size:12px; color:#c9d1d9; line-height:1.6; }
+.callout strong { color:#79c0ff; }
+.second { margin-top:48px; }
+.st { text-align:center; margin-bottom:24px; }
+.st h2 { font-size:18px; font-weight:700; color:#fff; margin-bottom:4px; }
+.st p { font-size:12px; color:#8b949e; }
+.pgrid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:18px; }
+.pc { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:16px 14px; }
+.pch { display:flex; align-items:center; gap:10px; margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid #21262d; }
+.pi { width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; flex-shrink:0; }
+.pi-b { background:#1a2744; color:#79c0ff; border:1.5px solid #1565c0; }
+.pi-g { background:#1a2e1a; color:#56d364; border:1.5px solid #2ea043; }
+.pi-a { background:#2d1b00; color:#f0a732; border:1.5px solid #d29922; }
+.pi-p { background:#200d2d; color:#d2a8ff; border:1.5px solid #8957e5; }
+.pi-t { background:#0d2626; color:#39d353; border:1.5px solid #1f883d; }
+.pi-r { background:#2d0e0e; color:#ff7b72; border:1.5px solid #da3633; }
+.pct { font-size:12.5px; font-weight:700; color:#e6edf3; }
+.pcs { font-size:10px; color:#8b949e; }
+.pci { display:flex; align-items:flex-start; gap:5px; margin-bottom:4px; font-size:10.5px; color:#8b949e; line-height:1.4; }
+.pcb { color:#30363d; flex-shrink:0; font-size:9px; margin-top:2px; }
+.cflow { background:#161b22; border:1px solid #30363d; border-radius:12px; padding:18px 20px; }
+.cft { font-size:13px; font-weight:700; color:#e6edf3; margin-bottom:14px; text-align:center; }
+.cfr { display:flex; align-items:center; gap:8px; }
+.cfb { flex:1; background:#0d1117; border-radius:6px; padding:8px 10px; text-align:center; border:1px solid #30363d; }
+.cfbl { font-size:10px; color:#8b949e; margin-bottom:2px; }
+.cfbv { font-size:12px; font-weight:700; }
+.cfv-b { color:#79c0ff; } .cfv-g { color:#56d364; } .cfv-a { color:#f0a732; }
+.cfa { font-size:18px; color:#30363d; flex-shrink:0; }
+.tooltip { position:fixed; background:#1c2128; border:1px solid #30363d; border-radius:8px; padding:10px 14px; font-size:12px; color:#e6edf3; max-width:280px; box-shadow:0 8px 24px rgba(0,0,0,0.4); z-index:1000; pointer-events:none; opacity:0; transition:opacity 0.15s; line-height:1.5; }
+.tooltip.visible { opacity:1; }
+</style>
+</head>
+<body>
+<div class="page-header">
+  <div class="bmes-tag">BMES - Beyond the Expected</div>
+  <h1>Image Capture for Sales Orders - Complete Data Flow</h1>
+  <p>Hover over numbered steps and action boxes to see technical detail. Click any step number to highlight its row.</p>
+</div>
+<div class="diagram-outer">
+  <div class="lane-headers">
+    <div class="lane-header lh-step">Step</div>
+    <div class="lane-header lh-user">BMES Staff</div>
+    <div class="lane-header lh-app">Capture App</div>
+    <div class="lane-header lh-acu">Acumatica ERP</div>
+    <div class="lane-header lh-ext">Part Sources / Portal</div>
+  </div>
+  <div class="lane-body" id="laneBody"></div>
+
+  <div class="legend">
+    <div class="li"><div class="ld" style="background:#1565c0;"></div>Steps 1-4: Setup and auth</div>
+    <div class="li"><div class="ld" style="background:#2ea043;"></div>Steps 5-8: Active capture and sync</div>
+    <div class="li"><div class="ld" style="background:#d29922;"></div>Steps 9-11: Review and API exposure</div>
+    <div class="li"><div class="ld" style="background:#8957e5;"></div>Steps 11-12: Tracker and portal</div>
+    <div class="li"><div class="ld" style="background:#0e1629;border:1px solid #1565c0;"></div>BMES Staff</div>
+    <div class="li"><div class="ld" style="background:#0e1a0e;border:1px solid #2ea043;"></div>Capture App</div>
+    <div class="li"><div class="ld" style="background:#1a1200;border:1px solid #d29922;"></div>Acumatica ERP</div>
+    <div class="li"><div class="ld" style="background:#160d1a;border:1px solid #8957e5;"></div>External Systems</div>
+  </div>
+  <div class="callout"><strong>Key point for BMES IT:</strong> Photo data travels directly from the device browser to the Acumatica REST API. Acumatica routes to AWS using its own storage config. Tayana servers are not in the data path at any step. Every hop is audited and traceable in Acumatica.</div>
+
+  <div class="second">
+    <div class="st">
+      <h2>Tayana Capture - Multi-Screen Product Architecture</h2>
+      <p>One app, one infrastructure. Different Acumatica screens and clients are configured via the Setup Screen. No code changes required.</p>
+    </div>
+    <div class="pgrid">
+      <div class="pc">
+        <div class="pch"><div class="pi pi-b">SO</div><div><div class="pct">Sales Orders</div><div class="pcs">BMES - Current Deployment</div></div></div>
+        <div class="pci"><span class="pcb">&#9658;</span>Screen ID: SO.30.10.00</div>
+        <div class="pci"><span class="pcb">&#9658;</span>Key Fields: OrderType, OrderNbr</div>
+        <div class="pci"><span class="pcb">&#9658;</span>Stages: Before / WIP / After</div>
+        <div class="pci"><span class="pcb">&#9658;</span>Workflow mapping configured per client</div>
+      </div>
+      <div class="pc">
+        <div class="pch"><div class="pi pi-g">PO</div><div><div class="pct">Purchase Orders</div><div class="pcs">Any Acumatica Client</div></div></div>
+        <div class="pci"><span class="pcb">&#9658;</span>Screen ID: PO.30.10.00</div>
+        <div class="pci"><span class="pcb">&#9658;</span>Key Fields: OrderType, OrderNbr</div>
+        <div class="pci"><span class="pcb">&#9658;</span>Stages: On Dock / Inspected / Received</div>
+        <div class="pci"><span class="pcb">&#9658;</span>1-2 days to configure and deploy</div>
+      </div>
+      <div class="pc">
+        <div class="pch"><div class="pi pi-a">FS</div><div><div class="pct">Field Service</div><div class="pcs">Any Acumatica Client</div></div></div>
+        <div class="pci"><span class="pcb">&#9658;</span>Screen ID: FS.30.00.00</div>
+        <div class="pci"><span class="pcb">&#9658;</span>Key Fields: RefNbr, AppointmentNbr</div>
+        <div class="pci"><span class="pcb">&#9658;</span>Stages: Arrived / In Progress / Completed</div>
+        <div class="pci"><span class="pcb">&#9658;</span>1-2 days to configure and deploy</div>
+      </div>
+      <div class="pc">
+        <div class="pch"><div class="pi pi-p">PR</div><div><div class="pct">Projects</div><div class="pcs">Any Acumatica Client</div></div></div>
+        <div class="pci"><span class="pcb">&#9658;</span>Screen ID: PM.301000</div>
+        <div class="pci"><span class="pcb">&#9658;</span>Key Fields: ProjectID</div>
+        <div class="pci"><span class="pcb">&#9658;</span>Stages: Survey / Construction / Handover</div>
+        <div class="pci"><span class="pcb">&#9658;</span>1-2 days to configure and deploy</div>
+      </div>
+      <div class="pc">
+        <div class="pch"><div class="pi pi-t">WO</div><div><div class="pct">Work Orders</div><div class="pcs">Manufacturing Clients</div></div></div>
+        <div class="pci"><span class="pcb">&#9658;</span>Screen ID: AM.301000</div>
+        <div class="pci"><span class="pcb">&#9658;</span>Key Fields: OrderType, ProdOrdID</div>
+        <div class="pci"><span class="pcb">&#9658;</span>Stages: Pre-Production / In-Process / QC</div>
+        <div class="pci"><span class="pcb">&#9658;</span>1-2 days to configure and deploy</div>
+      </div>
+      <div class="pc" style="border-style:dashed;">
+        <div class="pch"><div class="pi pi-r">+</div><div><div class="pct">Any Screen</div><div class="pcs">Future Expansion</div></div></div>
+        <div class="pci"><span class="pcb">&#9658;</span>Register any Acumatica Screen ID</div>
+        <div class="pci"><span class="pcb">&#9658;</span>Define key fields and stage labels</div>
+        <div class="pci"><span class="pcb">&#9658;</span>Map workflow stages to capture tabs</div>
+        <div class="pci"><span class="pcb">&#9658;</span>No code change to the capture app</div>
+      </div>
+    </div>
+    <div class="cflow">
+      <div class="cft">Stage Label Sync - How One Change Updates Both the App and Acumatica</div>
+      <div class="cfr">
+        <div class="cfb"><div class="cfbl">Admin changes label in Setup Screen</div><div class="cfbv cfv-b">"Before" to "Intake"</div></div>
+        <div class="cfa">&#9658;</div>
+        <div class="cfb"><div class="cfbl">App writes to Acumatica Config Table via API</div><div class="cfbv cfv-g">STAGE_1 Display Label = "Intake"</div></div>
+        <div class="cfa">&#9658;</div>
+        <div class="cfb"><div class="cfbl">Acumatica Pictures Tab reads config on next load</div><div class="cfbv cfv-a">Row label shows "Intake"</div></div>
+        <div class="cfa">&#9658;</div>
+        <div class="cfb"><div class="cfbl">Capture App reads config on next order load</div><div class="cfbv cfv-g">Tab label shows "Intake"</div></div>
+      </div>
+      <div style="font-size:11px;color:#8b949e;text-align:center;margin-top:10px;">Control IDs (STAGE_1, STAGE_2, STAGE_3) never change. Only display labels change. One source of truth: the Acumatica Configuration Table.</div>
+    </div>
+  </div>
+</div>
+<div class="tooltip" id="tip"></div>
+<script>
+const steps = [
+  { num:1, cls:'sn-b', desc:'CSR opens\nSales Order', tip:'Step 1: The CSR opens the Sales Order in Acumatica. The QR code is always visible in the header without any button click. No setup needed per order.',
+    user:{cls:'ab-b',tc:'at-b',title:'Open Sales Order in Acumatica',detail:'CSR navigates to SO screen on desktop. Order is In Processing. QR code renders immediately in the header right column below Order Total.'},
+    app:null,
+    acu:{cls:'ab-a',tc:'at-a',title:'QR Code Renders in Header',detail:'Acumatica generates QR code URL dynamically: capture.bmes-apps.com/so?order=SO004521&stage=wip. Stage is determined from current workflow stage.'},
+    ext:null },
+  { num:2, cls:'sn-b', desc:'Technician\nscans QR', tip:'Step 2: The technician points their phone camera at the QR code on the desktop screen. No typing, no navigation, no separate login prompt if session is active.',
+    user:{cls:'ab-b',tc:'at-b',title:'Point Phone at QR Code on Screen',detail:'Technician at repair bench scans the QR code from the CSR desktop screen. Works from up to 3 feet away in normal lighting.'},
+    app:{cls:'ab-g',tc:'at-g',title:'Decode QR and Open Capture App',detail:'Device browser opens the capture app URL. App decodes SO number and stage from URL parameters. Checks for active session token.'},
+    acu:null,ext:null },
+  { num:3, cls:'sn-b', desc:'Authenticate\n(first time only)', tip:'Step 3: First-time users or expired sessions see the Acumatica login page. Returning users with valid tokens skip directly to Step 4. No separate app password exists.',
+    user:{cls:'ab-b',tc:'at-b',title:'Enter Acumatica Credentials Once',detail:'User enters existing Acumatica username and password on the standard Acumatica login page. This step is skipped on all future uses while the session token is valid (default: 8 hours).'},
+    app:{cls:'ab-g',tc:'at-g',title:'OAuth 2.0 Token Exchange',detail:'App redirects to Acumatica OAuth endpoint. On success, Acumatica issues a signed access token. Token stored securely in browser credential storage on device.'},
+    acu:{cls:'ab-a',tc:'at-a',title:'Validate Credentials via OAuth',detail:'Acumatica authenticates the user against its own user database. Issues access token. All existing role-based access controls apply to every subsequent API call.'},
+    ext:null },
+  { num:4, cls:'sn-b', desc:'App loads\norder data', tip:'Step 4: The app calls Acumatica to retrieve SO details and existing photo counts for all stages. This populates the app header and determines which stage tab to pre-select.',
+    user:null,
+    app:{cls:'ab-g',tc:'at-g',title:'GET Sales Order Details via API',detail:'GET /entity/Default/22.200.001/SalesOrder/{Type}/{Nbr}. Retrieves customer name, workflow stage, existing photo count per stage. Pre-selects matching stage tab.'},
+    acu:{cls:'ab-a',tc:'at-a',title:'Return Order Data + Stage Config',detail:'Acumatica returns SO details and stage configuration from the Config Table. App determines active stage from workflow stage mapping.'},
+    ext:null },
+  { num:5, cls:'sn-g', desc:'Technician\ntaps shutter', tip:'Step 5: The technician taps Take Photo. The full-screen camera opens. The stage badge at the top confirms which stage they are capturing for. One tap fires the shutter.',
+    user:{cls:'ab-b',tc:'at-b',title:'Tap Take Photo. Press Shutter.',detail:'Capture screen shows correct stage tab active. Technician taps Take Photo button. Full-screen camera opens. Stage badge and SO number shown in overlay. One tap on shutter captures photo.'},
+    app:{cls:'ab-g',tc:'at-g',title:'Camera Opens via MediaDevices API',detail:'Browser calls navigator.mediaDevices.getUserMedia(). Device rear camera opens in full-screen. Grid lines shown for framing. Stage badge overlay confirms current stage.'},
+    acu:null,ext:null },
+  { num:6, cls:'sn-g', desc:'Compress\nand prepare', tip:'Step 6: The app compresses the photo from an average of 3 MB to approximately 300 KB using the browser Canvas API. The user sees no delay. GPS coordinates are captured simultaneously.',
+    user:null,
+    app:{cls:'ab-g',tc:'at-g',title:'Compress via Canvas API + Capture GPS',detail:'Canvas API resizes photo to 1280x960px. JPEG quality set to 80%. Avg reduction: 3MB to 200-400KB. Geolocation API captures GPS coordinates simultaneously. File name constructed per naming template (e.g. SO004521_B_001.jpg).'},
+    acu:null,ext:null },
+  { num:7, cls:'sn-g', desc:'Upload to\nAcumatica', tip:'Step 7: The compressed photo and all metadata are sent to Acumatica via a REST API PUT request. This runs in the background. The camera stays open for the next shot immediately.',
+    user:null,
+    app:{cls:'ab-g',tc:'at-g',title:'PUT File + Metadata to REST API',detail:'PUT /entity/Default/22.200.001/SalesOrder/{Type}/{Nbr}/files/{FileName}. File sent as binary. Metadata (Stage, GPS, Device, Captured By, Captured On) written to custom DAC endpoint separately. Upload runs in background.'},
+    acu:{cls:'ab-a',tc:'at-a',title:'Receive File. Route to AWS. Save Metadata.',detail:'Acumatica accepts file via REST API. Routes to AWS S3 via external file storage config. Writes metadata row to custom DAC table linked to SO by NoteID. Returns HTTP 200.'},
+    ext:null },
+  { num:8, cls:'sn-g', desc:'Sync confirmed\non device', tip:'Step 8: On receiving HTTP 200 from Acumatica, the app shows a green sync banner. The photo appears as a thumbnail. The stage count increments. The camera stays open.',
+    user:{cls:'ab-b',tc:'at-b',title:'Green Sync Banner. Thumbnail Appears.',detail:'Technician sees: "Photo 1 synced to Acumatica." Thumbnail appears in the stage tab. Count increments to 1. Camera stays open. Next shutter tap captures Photo 2 immediately.'},
+    app:{cls:'ab-g',tc:'at-g',title:'Update UI on HTTP 200 Response',detail:'Display green sync banner. Add numbered thumbnail. Increment stage count. Update audit log in left panel (iPad). If HTTP error: display red retry banner and queue photo for auto-retry.'},
+    acu:null,ext:null },
+  { num:9, cls:'sn-a', desc:'CSR reviews\nin Acumatica', tip:'Step 9: The CSR on their desktop refreshes the Sales Order. The Pictures tab shows the updated photo count and Last Captured By details for the WIP stage.',
+    user:{cls:'ab-b',tc:'at-b',title:'CSR Refreshes SO. Opens Pictures Tab.',detail:'CSR sees WIP row in master grid now shows Count=1, Status=Complete, Last Captured By=John Tariq. Clicking WIP row populates detail grid with Photo 1 metadata and Notes field.'},
+    app:null,
+    acu:{cls:'ab-a',tc:'at-a',title:'Pictures Tab Master and Detail Grids Update',detail:'Master grid reads photo count from custom DAC. Detail grid shows Photo 1 row with all metadata columns. Notes field is editable. GPS coordinates shown as read-only. View link opens file.'},
+    ext:null },
+  { num:10, cls:'sn-a', desc:'CSR adds\nNotes', tip:'Step 10: The CSR clicks the Notes field in the detail grid and types an observation about the photo. The note saves automatically when they click elsewhere. No save button needed.',
+    user:{cls:'ab-b',tc:'at-b',title:'Type Note in Detail Grid. Click Away.',detail:'CSR clicks Notes cell for Photo 1. Types: "Motherboard corrosion visible on capacitor row." Clicks outside the cell. Note saves automatically.'},
+    app:null,
+    acu:{cls:'ab-a',tc:'at-a',title:'Save Note. Write Audit Log Entry.',detail:'Note saved to photo metadata record in custom DAC. Audit log entry written: previous value (blank), new value, edited by, edited on. Note is now available via API for tracker and portal.'},
+    ext:null },
+  { num:11, cls:'sn-p', desc:'Tracker queries\nphoto data', tip:'Step 11: The Part Sources AI team queries Acumatica for photos linked to this sales order. They receive structured JSON with stage labels, file URLs, GPS, and notes - ready to display.',
+    user:null,app:null,
+    acu:{cls:'ab-a',tc:'at-a',title:'API Returns Structured Photo JSON',detail:'GET /entity/CaptureAPI/1.0/PhotoMetadata?SO=SO004521&Stage=WIP. Returns array of photo objects: Photo#, FileURL, Stage, CapturedBy, CapturedOn, Device, GPS, SyncStatus, Notes. Only stage-labeled photos returned.'},
+    ext:{cls:'ab-p',tc:'at-p',title:'Part Sources Tracker Queries API',detail:'Tracker calls Acumatica custom endpoint with SO number. Receives structured JSON with signed file URLs for direct image display. No internal BMES documents are ever returned by this endpoint.'} },
+  { num:12, cls:'sn-p', desc:'Customer\nviews photos', tip:'Step 12: The customer sees their device photos in the repair tracker, organized by stage. Notes like "Motherboard corrosion visible" appear below each photo. The deal is closed.',
+    user:null,app:null,acu:null,
+    ext:{cls:'ab-p',tc:'at-p',title:'Customer Sees Repair Photos by Stage',detail:'Customer opens repair tracker. Sees Before photos at intake, WIP photos during repair, After photos at completion. Staff notes displayed below each photo. No BMES internal data exposed. Customer satisfied.'} },
+];
+
+function makeCell(data, colCls) {
+  const div = document.createElement('div');
+  div.className = 'lc ' + colCls;
+  const fc = document.createElement('div');
+  fc.className = 'fc';
+  if (data) {
+    const ab = document.createElement('div');
+    ab.className = 'ab ' + data.cls;
+    ab.innerHTML = '<div class="at ' + data.tc + '">' + data.title + '</div><div class="ad">' + data.detail + '</div>';
+    ab.title = data.detail;
+    fc.appendChild(ab);
+  }
+  div.appendChild(fc);
+  return div;
+}
+
+const body = document.getElementById('laneBody');
+steps.forEach(s => {
+  const stepCell = document.createElement('div');
+  stepCell.className = 'lc steps';
+  const fc = document.createElement('div');
+  fc.className = 'fc sc';
+  const sn = document.createElement('div');
+  sn.className = 'sn ' + s.cls;
+  sn.textContent = s.num;
+  sn.dataset.tip = s.tip;
+  const sd = document.createElement('div');
+  sd.className = 'sd';
+  sd.textContent = s.desc;
+  fc.appendChild(sn); fc.appendChild(sd);
+  stepCell.appendChild(fc);
+  body.appendChild(stepCell);
+  body.appendChild(makeCell(s.user, 'user'));
+  body.appendChild(makeCell(s.app, 'app'));
+  body.appendChild(makeCell(s.acu, 'acu'));
+  body.appendChild(makeCell(s.ext, 'ext'));
+});
+
+const tip = document.getElementById('tip');
+document.querySelectorAll('.sn[data-tip]').forEach(el => {
+  el.addEventListener('mouseenter', () => { tip.textContent = el.dataset.tip; tip.classList.add('visible'); });
+  el.addEventListener('mousemove', e => { tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY-8)+'px'; });
+  el.addEventListener('mouseleave', () => tip.classList.remove('visible'));
+});
+document.querySelectorAll('.ab').forEach(el => {
+  el.addEventListener('mouseenter', () => { tip.textContent = el.title; tip.classList.add('visible'); });
+  el.addEventListener('mousemove', e => { tip.style.left=(e.clientX+14)+'px'; tip.style.top=(e.clientY-8)+'px'; });
+  el.addEventListener('mouseleave', () => tip.classList.remove('visible'));
+});
+</script>
+</body>
+</html>

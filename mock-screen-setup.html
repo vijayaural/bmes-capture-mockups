@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BMES Capture App — Setup Screen</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;
+  background:#e8eaed;
+  padding:40px 30px;
+  color:#222;
+}
+
+.page-title { text-align:center; margin-bottom:40px; }
+.page-title h1 { font-size:22px; font-weight:700; color:#1565c0; margin-bottom:6px; }
+.page-title p { font-size:13px; color:#666; }
+
+/* Layout row */
+.layout-row {
+  display:flex;
+  gap:40px;
+  justify-content:center;
+  align-items:flex-start;
+  flex-wrap:wrap;
+}
+
+/* ══════════════ PHONE FRAME ══════════════ */
+.phone-wrap { display:flex; flex-direction:column; align-items:center; gap:14px; }
+.phone-label { font-size:11px; font-weight:700; color:#1565c0; text-transform:uppercase; letter-spacing:0.08em; background:#e3f0ff; padding:3px 14px; border-radius:10px; }
+.phone {
+  width:360px;
+  background:#f2f4f7;
+  border-radius:40px;
+  border:8px solid #1a1a1a;
+  box-shadow:0 20px 60px rgba(0,0,0,0.28), inset 0 0 0 1.5px #333;
+  overflow:hidden;
+}
+.phone-notch { background:#1a1a1a; height:26px; display:flex; justify-content:center; align-items:flex-end; padding-bottom:4px; }
+.notch-pill { background:#333; width:90px; height:16px; border-radius:8px; }
+.phone-screen { background:#f2f4f7; max-height:720px; overflow-y:auto; }
+.phone-screen::-webkit-scrollbar { width:3px; }
+.phone-screen::-webkit-scrollbar-thumb { background:#ccc; border-radius:3px; }
+
+/* ══════════════ IPAD FRAME ══════════════ */
+.ipad-wrap { display:flex; flex-direction:column; align-items:center; gap:14px; }
+.ipad {
+  width:860px;
+  background:#f2f4f7;
+  border-radius:20px;
+  border:9px solid #1a1a1a;
+  box-shadow:0 20px 60px rgba(0,0,0,0.28), inset 0 0 0 1.5px #333;
+  overflow:hidden;
+}
+.ipad-bar { background:#1a1a1a; height:18px; display:flex; justify-content:center; align-items:center; }
+.ipad-pill { background:#333; width:70px; height:9px; border-radius:5px; }
+.ipad-screen { display:flex; flex-direction:column; max-height:680px; }
+
+/* ══════════════ APP HEADER ══════════════ */
+.app-header {
+  background:#1565c0;
+  padding:10px 14px 8px;
+  flex-shrink:0;
+}
+.app-header-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.back-btn { color:rgba(255,255,255,0.85); font-size:11px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:4px; }
+.header-title { font-size:13px; font-weight:700; color:white; }
+.save-btn { background:rgba(255,255,255,0.2); color:white; border:none; border-radius:6px; padding:4px 12px; font-size:11px; font-weight:700; cursor:pointer; }
+.save-btn:hover { background:rgba(255,255,255,0.3); }
+
+/* ══════════════ SETTINGS BODY ══════════════ */
+.settings-body { padding:12px; overflow-y:auto; }
+.settings-body::-webkit-scrollbar { width:3px; }
+.settings-body::-webkit-scrollbar-thumb { background:#ccc; border-radius:3px; }
+
+/* Section */
+.setting-section { margin-bottom:14px; }
+.section-header {
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-bottom:6px;
+  padding:0 2px;
+}
+.section-title {
+  font-size:10px;
+  font-weight:800;
+  color:#1565c0;
+  text-transform:uppercase;
+  letter-spacing:0.08em;
+  flex:1;
+}
+.admin-badge {
+  font-size:9px;
+  font-weight:700;
+  color:#b45309;
+  background:#fff8e1;
+  border:1px solid #ffe082;
+  border-radius:8px;
+  padding:1px 7px;
+  display:flex;
+  align-items:center;
+  gap:3px;
+}
+
+.setting-card {
+  background:white;
+  border-radius:10px;
+  overflow:hidden;
+  box-shadow:0 1px 3px rgba(0,0,0,0.07);
+}
+
+/* Setting row */
+.setting-row {
+  display:flex;
+  align-items:center;
+  padding:10px 12px;
+  border-bottom:1px solid #f0f0f0;
+  gap:10px;
+}
+.setting-row:last-child { border-bottom:none; }
+.setting-icon { font-size:16px; flex-shrink:0; width:24px; text-align:center; }
+.setting-info { flex:1; min-width:0; }
+.setting-label { font-size:12px; font-weight:600; color:#222; }
+.setting-desc { font-size:10px; color:#999; margin-top:1px; line-height:1.4; }
+.setting-control { flex-shrink:0; }
+
+/* Toggle switch */
+.toggle {
+  width:40px; height:22px;
+  border-radius:11px;
+  position:relative;
+  cursor:pointer;
+  flex-shrink:0;
+  transition:background 0.2s;
+}
+.toggle.on { background:#1565c0; }
+.toggle.off { background:#ccc; }
+.toggle-knob {
+  position:absolute;
+  top:3px;
+  width:16px; height:16px;
+  border-radius:50%;
+  background:white;
+  box-shadow:0 1px 3px rgba(0,0,0,0.2);
+  transition:left 0.2s;
+}
+.toggle.on .toggle-knob { left:21px; }
+.toggle.off .toggle-knob { left:3px; }
+
+/* Input field in setting row */
+.setting-input {
+  border:1px solid #ddd;
+  border-radius:6px;
+  padding:5px 8px;
+  font-size:11px;
+  color:#333;
+  font-family:inherit;
+  width:160px;
+  background:#fafafa;
+}
+.setting-input:focus { border-color:#1565c0; outline:none; background:white; }
+
+/* Select dropdown */
+.setting-select {
+  border:1px solid #ddd;
+  border-radius:6px;
+  padding:5px 8px;
+  font-size:11px;
+  color:#333;
+  font-family:inherit;
+  background:#fafafa;
+  cursor:pointer;
+}
+.setting-select:focus { border-color:#1565c0; outline:none; }
+
+/* Slider */
+.setting-slider { width:100px; accent-color:#1565c0; }
+
+/* Value chip */
+.val-chip {
+  font-size:11px; font-weight:700; color:#1565c0;
+  background:#e3f0ff; border-radius:8px;
+  padding:2px 8px; min-width:44px; text-align:center;
+}
+
+/* Action button in row */
+.row-action {
+  font-size:11px; font-weight:600; color:#1565c0;
+  background:#e3f0ff; border:none; border-radius:6px;
+  padding:5px 10px; cursor:pointer; white-space:nowrap;
+}
+.row-action:hover { background:#c8dff8; }
+.row-action.danger { color:#c62828; background:#fde8e8; }
+
+/* Logo upload area */
+.logo-upload-area {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-bottom:1px solid #f0f0f0;
+}
+.logo-preview {
+  width:80px; height:32px;
+  border:1px solid #e0e0e0;
+  border-radius:6px;
+  background:#f5f5f5;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  overflow:hidden;
+}
+.logo-preview-inner { max-width:100%; max-height:100%; }
+.logo-upload-info { flex:1; }
+.logo-upload-label { font-size:12px; font-weight:600; color:#222; }
+.logo-upload-desc { font-size:10px; color:#999; margin-top:1px; }
+.logo-upload-btn { font-size:11px; font-weight:600; color:#1565c0; background:#e3f0ff; border:none; border-radius:6px; padding:5px 10px; cursor:pointer; }
+
+/* Stage config rows */
+.stage-config-row {
+  display:flex;
+  align-items:center;
+  padding:8px 12px;
+  border-bottom:1px solid #f0f0f0;
+  gap:8px;
+}
+.stage-config-row:last-child { border-bottom:none; }
+.stage-color-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.stage-config-input {
+  flex:1; border:1px solid #ddd; border-radius:5px;
+  padding:4px 7px; font-size:11.5px; color:#333; font-family:inherit;
+}
+.stage-config-input:focus { border-color:#1565c0; outline:none; }
+.stage-remove { color:#ccc; font-size:14px; cursor:pointer; }
+.stage-remove:hover { color:#c62828; }
+
+/* Add stage btn */
+.add-stage-btn {
+  display:flex; align-items:center; gap:6px;
+  padding:8px 12px;
+  color:#1565c0; font-size:11.5px; font-weight:600;
+  cursor:pointer; background:#f5f9ff;
+  border-top:1px dashed #c5d9f0;
+  border-radius:0 0 10px 10px;
+}
+
+/* Bottom nav */
+.bottom-nav {
+  background:white; border-top:1px solid #e0e0e0;
+  display:flex; padding:6px 0 3px; flex-shrink:0;
+}
+.nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; cursor:pointer; padding:3px 0; }
+.nav-icon { font-size:17px; color:#bbb; }
+.nav-icon.active { color:#1565c0; }
+.nav-lbl { font-size:9px; color:#bbb; font-weight:500; }
+.nav-lbl.active { color:#1565c0; }
+
+/* ══════════════ IPAD TWO-COLUMN ══════════════ */
+.ipad-settings-body {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0;
+  flex:1;
+  overflow-y:auto;
+}
+.ipad-settings-body::-webkit-scrollbar { width:4px; }
+.ipad-settings-body::-webkit-scrollbar-thumb { background:#ccc; border-radius:3px; }
+.ipad-col { padding:14px 14px; border-right:1px solid #e8e8e8; }
+.ipad-col:last-child { border-right:none; }
+
+/* Caption */
+.caption-box {
+  background:white; border-radius:10px; padding:16px 18px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+  max-width:360px;
+}
+.caption-screen-id { font-size:10px; font-weight:700; color:#1565c0; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px; }
+.caption-title { font-size:13px; font-weight:700; color:#222; margin-bottom:6px; }
+.caption-text { font-size:11px; color:#555; line-height:1.55; }
+
+.ipad-caption-box {
+  background:white; border-radius:10px; padding:16px 18px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+  width:860px;
+  margin-top:0;
+}
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <h1>BMES Capture App — Setup Screen</h1>
+  <p>Accessible from the Profile tab. Administrator sections require admin credentials or PIN to modify.</p>
+</div>
+
+<div class="layout-row">
+
+<!-- ══════════════════════════════════════
+     PHONE — SETUP SCREEN
+══════════════════════════════════════ -->
+<div class="phone-wrap">
+  <div class="phone-label">Phone — Setup Screen</div>
+  <div class="phone">
+    <div class="phone-notch"><div class="notch-pill"></div></div>
+    <div class="phone-screen">
+
+      <!-- HEADER -->
+      <div class="app-header">
+        <div class="app-header-row">
+          <div class="back-btn">‹ Profile</div>
+          <div class="header-title">Setup</div>
+          <button class="save-btn">Save</button>
+        </div>
+      </div>
+
+      <div class="settings-body">
+
+        <!-- ── BRANDING ── -->
+        <div class="setting-section">
+          <div class="section-header">
+            <span class="section-title">Branding</span>
+            <span class="admin-badge">🔒 Admin Only</span>
+          </div>
+          <div class="setting-card">
+            <div class="logo-upload-area">
+              <div class="logo-preview">
+                <svg class="logo-preview-inner" viewBox="0 0 200 65" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="2" y="2" width="44" height="44" rx="8" fill="none" stroke="#1565c0" stroke-width="3.5"/>
+                  <polyline points="6,24 13,24 17,10 22,38 27,18 31,28 35,14 40,24 48,24" fill="none" stroke="#1565c0" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  <text x="58" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="30" fill="#1565c0">BMES</text>
+                </svg>
+              </div>
+              <div class="logo-upload-info">
+                <div class="logo-upload-label">App Logo</div>
+                <div class="logo-upload-desc">PNG or SVG, max 200 KB.<br>Shown on login and header.</div>
+              </div>
+              <button class="logo-upload-btn">Upload</button>
+            </div>
+            <div class="setting-row">
+              <div class="setting-icon">🏷</div>
+              <div class="setting-info">
+                <div class="setting-label">App Display Name</div>
+                <div class="setting-desc">Shown on login screen and browser tab</div>
+              </div>
+              <input type="text" class="setting-input" value="BMES Capture">
+            </div>
+          </div>
+        </div>
+
+        <!-- ── ACUMATICA CONNECTION ── -->
+        <div class="setting-section">
+          <div class="section-header">
+            <span class="section-title">Acumatica Connection</span>
+            <span class="admin-badge">🔒 Admin Only</span>
+          </div>
+          <div class="setting-card">
+            <div class="setting-row">
+              <div class="setting-icon">🔗</div>
+              <div class="setting-info">
+                <div class="setting-label">Site URL</div>
+                <div class="setting-desc">Your Acumatica instance address</div>
+              </div>
+              <input type="text" class="setting-input" value="bmes.acumatica.com" style="width:140px;font-size:10.5px;">
+            </div>
+            <div class="setting-row">
+              <div class="setting-icon">🏢</div>
+              <div class="setting-info">
+                <div class="setting-label">Tenant / Company</div>
+                <div class="setting-desc">Acumatica tenant identifier</div>
+              </div>
+              <input type="text" class="setting-input" value="BMES" style="width:100px;">
+            </div>
+          </div>
+        </div>
+
+        <!-- ── STAGE CONFIGURATION ── -->
+        <div class="setting-section">
+          <div class="section-header">
+            <span class="section-title">Stage Configuration</span>
+            <span class="admin-badge">🔒 Admin Only</span>
+          </div>
+          <div class="setting-card">
+            <div class="stage-config-row">
+              <div class="stage-color-dot" style="background:#1565c0;"></div>
+              <input type="text" class="stage-config-input" value="Before">
+              <span class="stage-remove">×</span>
+            </div>
+            <div class="stage-config-row">
+              <div class="stage-color-dot" style="background:#ff9800;"></div>
+              <input type="text" class="stage-config-input" value="WIP">
+              <span class="stage-remove">×</span>
+            </div>
+            <div class="stage-config-row">
+              <div class="stage-color-dot" style="background:#2e7d32;"></div>
+              <input type="text" class="stage-config-input" value="After">
+              <span class="stage-remove">×</span>
+            </div>
+            <div class="add-stage-btn">&#43; Add Stage &nbsp;<span style="font-size:10px;color:#aaa;font-weight:400;">(max 5)</span></div>
+          </div>
+        </div>
+
+        <!-- ── FILE SETTINGS ── -->
+        <div class="setting-section">
+          <div class="section-header">
+            <span class="section-title">File Settings</span>
+            <span class="admin-badge">🔒 Admin Only</span>
+          </div>
+          <div class="setting-card">
+            <div class="setting-row">
+              <div class="setting-icon">📄</div>
+              <div class="setting-info">
+                <div class="setting-label">File Naming Template</div>
+                <div class="setting-desc">{SO} {Stage} {Seq} → SO004521_B_001</div>
+              </div>
+              <input type="text" class="setting-input" value="{SO}_{Stage}_{Seq}" style="width:130px;font-size:10.5px;">
+            </div>
+            <div class="setting-row">
+              <div class="setting-icon">📐</div>
+              <div class="setting-info">
+                <div class="setting-label">Capture Resolution</div>
+                <div class="setting-desc">Max dimension of compressed image</div>
+              </div>
+              <select class="setting-select">
+                <option>1280 × 960</option>
+                <option>1920 × 1440</option>
+                <option>800 × 600</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <div class="setting-icon">🗜</div>
+              <div class="setting-info">
+                <div class="setting-label">JPEG Quality</div>
+                <div class="setting-desc">Higher = larger file, better quality</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <input type="range" class="setting-slider" min="60" max="95" value="80">
+                <span class="val-chip">80%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── CAPTURE SETTINGS ── -->
+        <div class="setting-section">
+          <div class="section-header">
+            <span class="section-title">Capture Settings</span>
+          </div>
+          <div class="setting-card">
+            <div class="setting-row">
+              <div class="setting-icon">📍</div>
+              <div class="setting-info">
+                <div class="setting-label">Capture GPS Coordinates</div>
+                <div class="setting-desc">Saves location metadata with each photo for audit purposes. Requires device location permission.</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off');">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-icon">💾</div>
+              <div class="setting-info">
+                <div class="setting-label">Save Copy to Device</div>
+                <div class="setting-desc">Saves a compressed copy to camera roll after upload. Off by default.</div>
+              </div>
+              <div class="toggle off" onclick="this.classList.toggle('on');this.classList.toggle('off');">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-icon">🖼</div>
+              <div class="setting-info">
+                <div class="setting-label">Allow Gallery Upload</div>
+                <div class="setting-desc">Enables Upload from Gallery button on capture screen.</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off');">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-icon">📂</div>
+              <div class="setting-info">
+                <div class="setting-label">Default Stage on Load</div>
+                <div class="setting-desc">Auto-detect from Acumatica workflow stage</div>
+              </div>
+              <select class="setting-select">
+                <option>Auto-detect</option>
+                <option>Always Before</option>
+                <option>Always WIP</option>
+                <option>Always After</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SECURITY ── -->
+        <div class="setting-section">
+          <div class="section-header">
+            <span class="section-title">Security</span>
+          </div>
+          <div class="setting-card">
+            <div class="setting-row">
+              <div class="setting-icon">🔒</div>
+              <div class="setting-info">
+                <div class="setting-label">App Lock</div>
+                <div class="setting-desc">Requires Face ID, Touch ID, or PIN to resume after timeout.</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off');">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-icon">⏱</div>
+              <div class="setting-info">
+                <div class="setting-label">Auto-Lock Timeout</div>
+                <div class="setting-desc">Idle time before the app locks</div>
+              </div>
+              <select class="setting-select">
+                <option>1 minute</option>
+                <option selected>5 minutes</option>
+                <option>10 minutes</option>
+                <option>Never</option>
+              </select>
+            </div>
+            <div class="setting-row">
+              <div class="setting-icon">🔑</div>
+              <div class="setting-info">
+                <div class="setting-label">PIN Management</div>
+                <div class="setting-desc">Change or reset your 4-digit PIN</div>
+              </div>
+              <button class="row-action">Change PIN</button>
+            </div>
+            <div class="setting-row">
+              <div class="setting-icon">👤</div>
+              <div class="setting-info">
+                <div class="setting-label">Session Timeout</div>
+                <div class="setting-desc">Time before full re-login is required</div>
+              </div>
+              <select class="setting-select">
+                <option>4 hours</option>
+                <option selected>8 hours</option>
+                <option>24 hours</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SYNC SETTINGS ── -->
+        <div class="setting-section">
+          <div class="section-header">
+            <span class="section-title">Sync Settings</span>
+          </div>
+          <div class="setting-card">
+            <div class="setting-row">
+              <div class="setting-icon">🔔</div>
+              <div class="setting-info">
+                <div class="setting-label">Sync Failure Alert</div>
+                <div class="setting-desc">Alert user immediately when upload to Acumatica fails</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off');">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+            <div class="setting-row">
+              <div class="setting-icon">🔄</div>
+              <div class="setting-info">
+                <div class="setting-label">Auto Retry on Failure</div>
+                <div class="setting-desc">Automatically retry failed uploads when connection resumes</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off');">
+                <div class="toggle-knob"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SUPPORT ── -->
+        <div class="setting-section">
+          <div class="section-header">
+            <span class="section-title">Support</span>
+            <span class="admin-badge">🔒 Admin Only</span>
+          </div>
+          <div class="setting-card">
+            <div class="setting-row">
+              <div class="setting-icon">📧</div>
+              <div class="setting-info">
+                <div class="setting-label">Support Email</div>
+                <div class="setting-desc">Shown to users on the Profile screen</div>
+              </div>
+              <input type="text" class="setting-input" value="support@tayana.com" style="width:140px;font-size:10px;">
+            </div>
+            <div class="setting-row">
+              <div class="setting-icon">📞</div>
+              <div class="setting-info">
+                <div class="setting-label">Support Phone</div>
+                <div class="setting-desc">Optional direct support number</div>
+              </div>
+              <input type="text" class="setting-input" value="+1 888 000 0000" style="width:120px;font-size:10px;">
+            </div>
+          </div>
+        </div>
+
+        <!-- DANGER ZONE -->
+        <div class="setting-section">
+          <div class="section-header">
+            <span class="section-title" style="color:#c62828;">Danger Zone</span>
+            <span class="admin-badge">🔒 Admin Only</span>
+          </div>
+          <div class="setting-card">
+            <div class="setting-row">
+              <div class="setting-icon">🗑</div>
+              <div class="setting-info">
+                <div class="setting-label">Reset All Settings</div>
+                <div class="setting-desc">Restores all settings to factory defaults</div>
+              </div>
+              <button class="row-action danger">Reset</button>
+            </div>
+            <div class="setting-row">
+              <div class="setting-icon">🚪</div>
+              <div class="setting-info">
+                <div class="setting-label">Sign Out</div>
+                <div class="setting-desc">Clears session and returns to login</div>
+              </div>
+              <button class="row-action danger">Sign Out</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:12px;"></div>
+      </div><!-- end settings-body -->
+
+      <!-- BOTTOM NAV -->
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-icon">📷</div><div class="nav-lbl">Capture</div></div>
+        <div class="nav-item"><div class="nav-icon">🗂</div><div class="nav-lbl">Queue</div></div>
+        <div class="nav-item"><div class="nav-icon">🔍</div><div class="nav-lbl">Search SO</div></div>
+        <div class="nav-item"><div class="nav-icon active">👤</div><div class="nav-lbl active">Profile</div></div>
+      </div>
+
+    </div><!-- end phone-screen -->
+  </div><!-- end phone -->
+
+  <!-- Phone caption -->
+  <div class="caption-box">
+    <div class="caption-screen-id">Setup Screen — Phone</div>
+    <div class="caption-title">Scrollable Settings Page</div>
+    <div class="caption-text">
+      Accessed from the Profile tab. Orange lock badge marks sections that require administrator credentials to modify. All other sections are accessible to the logged-in user. Toggles are interactive. Save button commits all changes to the app's local configuration. Changes to Acumatica Connection or Stage Configuration take effect on the next app restart.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     IPAD — SETUP SCREEN (two-column)
+══════════════════════════════════════ -->
+<div class="ipad-wrap">
+  <div class="phone-label">iPad — Setup Screen</div>
+  <div class="ipad">
+    <div class="ipad-bar"><div class="ipad-pill"></div></div>
+    <div class="ipad-screen">
+
+      <!-- HEADER -->
+      <div class="app-header">
+        <div class="app-header-row">
+          <div class="back-btn">‹ Profile</div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <svg width="90" height="28" viewBox="0 0 200 65" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="2" width="44" height="44" rx="8" fill="none" stroke="white" stroke-width="3.5"/>
+              <polyline points="6,24 13,24 17,10 22,38 27,18 31,28 35,14 40,24 48,24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="58" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="30" fill="white">BMES</text>
+              <text x="58" y="50" font-family="Arial" font-style="italic" font-size="11.5" fill="rgba(255,255,255,0.7)" letter-spacing="1.2">BEYOND THE EXPECTED®</text>
+            </svg>
+            <div class="header-title">Setup &amp; Configuration</div>
+          </div>
+          <button class="save-btn" style="padding:5px 18px;font-size:12px;">Save All Changes</button>
+        </div>
+      </div>
+
+      <!-- TWO COLUMN BODY -->
+      <div class="ipad-settings-body">
+
+        <!-- LEFT COLUMN -->
+        <div class="ipad-col">
+
+          <!-- BRANDING -->
+          <div class="setting-section">
+            <div class="section-header">
+              <span class="section-title">Branding</span>
+              <span class="admin-badge">🔒 Admin Only</span>
+            </div>
+            <div class="setting-card">
+              <div class="logo-upload-area">
+                <div class="logo-preview" style="width:100px;height:36px;">
+                  <svg style="max-width:100%;max-height:100%;" viewBox="0 0 200 65" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="2" width="44" height="44" rx="8" fill="none" stroke="#1565c0" stroke-width="3.5"/>
+                    <polyline points="6,24 13,24 17,10 22,38 27,18 31,28 35,14 40,24 48,24" fill="none" stroke="#1565c0" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <text x="58" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="30" fill="#1565c0">BMES</text>
+                  </svg>
+                </div>
+                <div class="logo-upload-info">
+                  <div class="logo-upload-label">App Logo</div>
+                  <div class="logo-upload-desc">PNG or SVG · Max 200 KB · Shown on login screen and app header</div>
+                </div>
+                <button class="logo-upload-btn">Upload Logo</button>
+              </div>
+              <div class="setting-row">
+                <div class="setting-icon">🏷</div>
+                <div class="setting-info"><div class="setting-label">App Display Name</div><div class="setting-desc">Shown on login screen and browser tab</div></div>
+                <input type="text" class="setting-input" value="BMES Capture" style="width:180px;">
+              </div>
+            </div>
+          </div>
+
+          <!-- ACUMATICA CONNECTION -->
+          <div class="setting-section">
+            <div class="section-header">
+              <span class="section-title">Acumatica Connection</span>
+              <span class="admin-badge">🔒 Admin Only</span>
+            </div>
+            <div class="setting-card">
+              <div class="setting-row">
+                <div class="setting-icon">🔗</div>
+                <div class="setting-info"><div class="setting-label">Site URL</div><div class="setting-desc">Your Acumatica instance address</div></div>
+                <input type="text" class="setting-input" value="https://bmes.acumatica.com" style="width:200px;font-size:10.5px;">
+              </div>
+              <div class="setting-row">
+                <div class="setting-icon">🏢</div>
+                <div class="setting-info"><div class="setting-label">Tenant / Company</div><div class="setting-desc">Acumatica tenant identifier</div></div>
+                <input type="text" class="setting-input" value="BMES" style="width:120px;">
+              </div>
+            </div>
+          </div>
+
+          <!-- STAGE CONFIGURATION -->
+          <div class="setting-section">
+            <div class="section-header">
+              <span class="section-title">Stage Configuration</span>
+              <span class="admin-badge">🔒 Admin Only</span>
+            </div>
+            <div class="setting-card">
+              <div class="stage-config-row"><div class="stage-color-dot" style="background:#1565c0;"></div><input type="text" class="stage-config-input" value="Before"><span class="stage-remove">×</span></div>
+              <div class="stage-config-row"><div class="stage-color-dot" style="background:#ff9800;"></div><input type="text" class="stage-config-input" value="WIP"><span class="stage-remove">×</span></div>
+              <div class="stage-config-row"><div class="stage-color-dot" style="background:#2e7d32;"></div><input type="text" class="stage-config-input" value="After"><span class="stage-remove">×</span></div>
+              <div class="add-stage-btn">&#43; Add Stage &nbsp;<span style="font-size:10px;color:#aaa;font-weight:400;">(max 5)</span></div>
+            </div>
+          </div>
+
+          <!-- FILE SETTINGS -->
+          <div class="setting-section">
+            <div class="section-header">
+              <span class="section-title">File Settings</span>
+              <span class="admin-badge">🔒 Admin Only</span>
+            </div>
+            <div class="setting-card">
+              <div class="setting-row">
+                <div class="setting-icon">📄</div>
+                <div class="setting-info"><div class="setting-label">File Naming Template</div><div class="setting-desc">Tokens: {SO} {Stage} {Date} {Seq}</div></div>
+                <input type="text" class="setting-input" value="{SO}_{Stage}_{Seq}" style="width:160px;font-size:10.5px;">
+              </div>
+              <div class="setting-row">
+                <div class="setting-icon">📐</div>
+                <div class="setting-info"><div class="setting-label">Capture Resolution</div><div class="setting-desc">Max dimension after compression</div></div>
+                <select class="setting-select"><option>1280 × 960</option><option>1920 × 1440</option><option>800 × 600</option></select>
+              </div>
+              <div class="setting-row">
+                <div class="setting-icon">🗜</div>
+                <div class="setting-info"><div class="setting-label">JPEG Quality</div><div class="setting-desc">80% recommended for documentation</div></div>
+                <div style="display:flex;align-items:center;gap:6px;"><input type="range" class="setting-slider" style="width:120px;" min="60" max="95" value="80"><span class="val-chip">80%</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUPPORT -->
+          <div class="setting-section">
+            <div class="section-header">
+              <span class="section-title">Support Contact</span>
+              <span class="admin-badge">🔒 Admin Only</span>
+            </div>
+            <div class="setting-card">
+              <div class="setting-row">
+                <div class="setting-icon">📧</div>
+                <div class="setting-info"><div class="setting-label">Support Email</div><div class="setting-desc">Shown to users on the Profile screen</div></div>
+                <input type="text" class="setting-input" value="support@tayana.com" style="width:180px;font-size:10.5px;">
+              </div>
+              <div class="setting-row">
+                <div class="setting-icon">📞</div>
+                <div class="setting-info"><div class="setting-label">Support Phone</div><div class="setting-desc">Optional direct line</div></div>
+                <input type="text" class="setting-input" value="+1 888 000 0000" style="width:150px;">
+              </div>
+            </div>
+          </div>
+
+        </div><!-- end left col -->
+
+        <!-- RIGHT COLUMN -->
+        <div class="ipad-col">
+
+          <!-- CAPTURE SETTINGS -->
+          <div class="setting-section">
+            <div class="section-header">
+              <span class="section-title">Capture Settings</span>
+            </div>
+            <div class="setting-card">
+              <div class="setting-row">
+                <div class="setting-icon">📍</div>
+                <div class="setting-info"><div class="setting-label">Capture GPS Coordinates</div><div class="setting-desc">Records latitude, longitude, and accuracy with every photo. Requires device location permission. Capture proceeds even if location is unavailable.</div></div>
+                <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off');"><div class="toggle-knob"></div></div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-icon">💾</div>
+                <div class="setting-info"><div class="setting-label">Save Copy to Device</div><div class="setting-desc">Saves a compressed copy to the camera roll after each successful upload. Off by default. Compressed version only — original quality is not retained.</div></div>
+                <div class="toggle off" onclick="this.classList.toggle('on');this.classList.toggle('off');"><div class="toggle-knob"></div></div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-icon">🖼</div>
+                <div class="setting-info"><div class="setting-label">Allow Gallery Upload</div><div class="setting-desc">Shows the Upload from Gallery button on the capture screen. Disable for strict audit-trail environments.</div></div>
+                <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off');"><div class="toggle-knob"></div></div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-icon">📂</div>
+                <div class="setting-info"><div class="setting-label">Default Stage on Load</div><div class="setting-desc">Which stage tab opens when an order is loaded via QR scan</div></div>
+                <select class="setting-select"><option>Auto-detect from Acumatica</option><option>Always Before</option><option>Always WIP</option><option>Always After</option></select>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECURITY -->
+          <div class="setting-section">
+            <div class="section-header">
+              <span class="section-title">Security</span>
+            </div>
+            <div class="setting-card">
+              <div class="setting-row">
+                <div class="setting-icon">🔒</div>
+                <div class="setting-info"><div class="setting-label">App Lock</div><div class="setting-desc">Requires Face ID, Touch ID, or 4-digit PIN to resume after idle timeout. Recommended for shared devices.</div></div>
+                <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off');"><div class="toggle-knob"></div></div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-icon">⏱</div>
+                <div class="setting-info"><div class="setting-label">Auto-Lock Timeout</div><div class="setting-desc">Idle time before the app locks and requires re-authentication</div></div>
+                <select class="setting-select"><option>1 minute</option><option selected>5 minutes</option><option>10 minutes</option><option>Never</option></select>
+              </div>
+              <div class="setting-row">
+                <div class="setting-icon">🔑</div>
+                <div class="setting-info"><div class="setting-label">PIN Management</div><div class="setting-desc">Change or reset your 4-digit backup PIN used when biometrics are unavailable</div></div>
+                <button class="row-action">Change PIN</button>
+              </div>
+              <div class="setting-row">
+                <div class="setting-icon">👤</div>
+                <div class="setting-info"><div class="setting-label">Session Timeout</div><div class="setting-desc">Time before full Acumatica re-login is required</div></div>
+                <select class="setting-select"><option>4 hours</option><option selected>8 hours</option><option>24 hours</option></select>
+              </div>
+            </div>
+          </div>
+
+          <!-- SYNC SETTINGS -->
+          <div class="setting-section">
+            <div class="section-header">
+              <span class="section-title">Sync Settings</span>
+            </div>
+            <div class="setting-card">
+              <div class="setting-row">
+                <div class="setting-icon">🔔</div>
+                <div class="setting-info"><div class="setting-label">Sync Failure Alert</div><div class="setting-desc">Notifies the user immediately when an upload to Acumatica fails</div></div>
+                <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off');"><div class="toggle-knob"></div></div>
+              </div>
+              <div class="setting-row">
+                <div class="setting-icon">🔄</div>
+                <div class="setting-info"><div class="setting-label">Auto Retry on Failure</div><div class="setting-desc">Automatically retries failed uploads when connection is restored</div></div>
+                <div class="toggle on" onclick="this.classList.toggle('on');this.classList.toggle('off');"><div class="toggle-knob"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DANGER ZONE -->
+          <div class="setting-section">
+            <div class="section-header">
+              <span class="section-title" style="color:#c62828;">Danger Zone</span>
+              <span class="admin-badge">🔒 Admin Only</span>
+            </div>
+            <div class="setting-card">
+              <div class="setting-row">
+                <div class="setting-icon">🗑</div>
+                <div class="setting-info"><div class="setting-label">Reset All Settings</div><div class="setting-desc">Restores all configuration to factory defaults. Cannot be undone.</div></div>
+                <button class="row-action danger">Reset</button>
+              </div>
+              <div class="setting-row">
+                <div class="setting-icon">🚪</div>
+                <div class="setting-info"><div class="setting-label">Sign Out</div><div class="setting-desc">Clears the active session token and returns to the login screen</div></div>
+                <button class="row-action danger">Sign Out</button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- end right col -->
+      </div><!-- end two-column -->
+    </div><!-- end ipad-screen -->
+  </div><!-- end ipad -->
+
+  <!-- iPad caption -->
+  <div class="ipad-caption-box">
+    <div class="caption-screen-id">Setup Screen — iPad</div>
+    <div class="caption-title">Two-Column Configuration Layout</div>
+    <div class="caption-text">
+      The iPad Setup Screen uses a two-column layout. Left column covers administrator-controlled settings: Branding, Acumatica Connection, Stage Configuration, File Settings, and Support Contact. Right column covers user-accessible settings: Capture Settings, Security, and Sync Settings, plus the Danger Zone. All toggles are interactive. The orange lock badge clearly marks sections that require administrator credentials before any change is saved. The Save All Changes button commits every modified setting in a single action, reducing the risk of partial saves.
+    </div>
+  </div>
+
+</div><!-- end ipad-wrap -->
+</div><!-- end layout-row -->
+
+</body>
+</html>

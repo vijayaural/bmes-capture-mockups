@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BMES Capture App — Phone Mock Screens</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f0f2f5;
+  padding: 40px 30px;
+  color: #222;
+}
+
+/* PAGE TITLE */
+.page-title {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.page-title h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1565c0;
+  margin-bottom: 6px;
+}
+.page-title p {
+  font-size: 13px;
+  color: #666;
+}
+
+/* GRID */
+.screens-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px 30px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* SCREEN CARD */
+.screen-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.screen-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1565c0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+  background: #e3f0ff;
+  padding: 3px 12px;
+  border-radius: 10px;
+}
+
+/* PHONE FRAME */
+.phone {
+  width: 320px;
+  background: #f2f4f7;
+  border-radius: 38px;
+  border: 8px solid #1a1a1a;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25), inset 0 0 0 1.5px #333;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.phone-notch {
+  background: #1a1a1a;
+  height: 26px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding-bottom: 4px;
+}
+.notch-pill { background: #333; width: 90px; height: 16px; border-radius: 8px; }
+.phone-screen { min-height: 580px; background: #f2f4f7; overflow: hidden; }
+
+/* BMES LOGO SVG — reusable via inline */
+.bmes-logo-svg { display: flex; align-items: center; }
+
+/* APP HEADER */
+.app-header {
+  background: #1565c0;
+  padding: 10px 14px 8px;
+}
+.app-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.user-chip {
+  background: rgba(255,255,255,0.18);
+  border-radius: 12px;
+  padding: 2px 9px;
+  font-size: 10px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.so-card {
+  background: rgba(255,255,255,0.13);
+  border-radius: 7px;
+  padding: 7px 10px;
+}
+.so-num { font-size: 13px; font-weight: 700; color: white; }
+.so-cust { font-size: 10px; color: rgba(255,255,255,0.8); margin-top: 1px; }
+.so-meta { display: flex; gap: 10px; margin-top: 4px; }
+.so-meta-item { font-size: 9.5px; color: rgba(255,255,255,0.72); display: flex; align-items: center; gap: 3px; }
+.so-dot { width: 6px; height: 6px; border-radius: 50%; background: #4fc3f7; display: inline-block; }
+
+/* STAGE TABS */
+.stage-tabs { background: white; border-bottom: 1px solid #e0e0e0; display: flex; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.stab { flex: 1; padding: 8px 3px; text-align: center; border-bottom: 3px solid transparent; cursor: pointer; }
+.stab-label { font-size: 10px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.03em; }
+.stab-count { font-size: 9px; color: #bbb; margin-top: 1px; }
+.stab.active { border-bottom-color: #1565c0; }
+.stab.active .stab-label { color: #1565c0; }
+.stab.active .stab-count { color: #1565c0; }
+.stab.done .stab-label { color: #2e7d32; }
+.stab.done .stab-count { color: #2e7d32; }
+
+/* CONTENT */
+.app-content { padding: 11px 12px 16px; }
+
+.section-title { font-size: 9.5px; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+
+/* STAGE CARD */
+.stage-card {
+  background: white; border-radius: 8px; padding: 10px 11px; margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+}
+.stage-card-title { font-size: 12px; font-weight: 700; color: #222; display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.stage-card-sub { font-size: 10px; color: #777; line-height: 1.4; }
+.sdot-orange { width: 8px; height: 8px; border-radius: 50%; background: #ff9800; display: inline-block; flex-shrink: 0; }
+.sdot-green { width: 8px; height: 8px; border-radius: 50%; background: #2e7d32; display: inline-block; flex-shrink: 0; }
+
+/* EMPTY STATE */
+.empty-state { background: #f8f9fa; border: 1.5px dashed #ccc; border-radius: 8px; padding: 16px; text-align: center; margin-bottom: 10px; }
+.empty-icon { font-size: 24px; margin-bottom: 4px; }
+.empty-text { font-size: 10.5px; color: #999; line-height: 1.4; }
+
+/* BUTTONS */
+.btn-primary {
+  width: 100%; background: #1565c0; color: white; border: none; border-radius: 10px;
+  padding: 13px 0; font-size: 12.5px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  box-shadow: 0 3px 10px rgba(21,101,192,0.3); margin-bottom: 7px;
+}
+.btn-secondary {
+  width: 100%; background: white; color: #1565c0; border: 1.5px solid #1565c0; border-radius: 10px;
+  padding: 10px 0; font-size: 11px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 7px;
+}
+.btn-scan {
+  width: 100%; background: #f0f4ff; color: #1565c0; border: 1.5px solid #90b4e8; border-radius: 10px;
+  padding: 10px 0; font-size: 11px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.btn-danger {
+  flex: 1; background: #d32f2f; color: white; border: none; border-radius: 8px;
+  padding: 11px 0; font-size: 11px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+.btn-warning {
+  flex: 1; background: #e65100; color: white; border: none; border-radius: 8px;
+  padding: 11px 0; font-size: 11px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 5px; margin-left: 7px;
+}
+.btn-green {
+  width: 100%; background: #2e7d32; color: white; border: none; border-radius: 10px;
+  padding: 13px 0; font-size: 12.5px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  box-shadow: 0 3px 10px rgba(46,125,50,0.3); margin-bottom: 7px;
+}
+
+/* PHOTOS GRID */
+.photos-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.photo-thumb {
+  width: 68px; height: 68px; border-radius: 7px; overflow: hidden;
+  position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.thumb-bg { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+.thumb-count {
+  position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.5);
+  color: white; font-size: 8.5px; text-align: center; padding: 2px; font-weight: 700;
+}
+.thumb-del {
+  position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.55);
+  color: white; border-radius: 50%; width: 16px; height: 16px;
+  display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700;
+}
+.thumb-add {
+  width: 68px; height: 68px; border-radius: 7px; background: #f0f0f0;
+  border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: #bbb; cursor: pointer;
+}
+
+/* SYNC INDICATOR */
+.sync-row {
+  display: flex; align-items: center; gap: 5px; background: #e8f5e9; border-radius: 6px;
+  padding: 5px 9px; margin-bottom: 8px; font-size: 10px; color: #2e7d32; font-weight: 600;
+}
+
+/* AUDIT CARD */
+.audit-card {
+  background: white; border-radius: 8px; padding: 9px 11px; margin-top: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+}
+.audit-row {
+  display: flex; justify-content: space-between; padding: 3px 0;
+  border-bottom: 1px solid #f0f0f0; font-size: 10px;
+}
+.audit-row:last-child { border-bottom: none; }
+.audit-label { color: #888; }
+.audit-value { color: #333; font-weight: 600; }
+
+/* BOTTOM NAV */
+.bottom-nav {
+  background: white; border-top: 1px solid #e0e0e0;
+  display: flex; padding: 6px 0 3px;
+}
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; padding: 3px 0; }
+.nav-icon { font-size: 17px; color: #bbb; }
+.nav-icon.active { color: #1565c0; }
+.nav-lbl { font-size: 9px; color: #bbb; font-weight: 500; }
+.nav-lbl.active { color: #1565c0; }
+
+/* QUEUE LIST */
+.queue-item {
+  background: white; border-radius: 8px; padding: 10px 11px; margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07); display: flex; align-items: center; gap: 10px;
+  cursor: pointer;
+}
+.queue-item:hover { background: #f5f9ff; }
+.queue-stage-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.queue-info { flex: 1; }
+.queue-so { font-size: 12px; font-weight: 700; color: #222; }
+.queue-cust { font-size: 10px; color: #777; margin-top: 1px; }
+.queue-chips { display: flex; gap: 4px; margin-top: 4px; }
+.chip {
+  font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 8px;
+  border: 1px solid; display: inline-block;
+}
+.chip-pending { color: #b45309; background: #fff8e1; border-color: #ffe082; }
+.chip-done { color: #2e7d32; background: #e8f5e9; border-color: #a5d6a7; }
+.queue-arrow { color: #bbb; font-size: 14px; }
+
+/* LOGIN SCREEN */
+.login-screen { background: white; padding: 24px 20px; }
+.login-logo-area { text-align: center; margin-bottom: 24px; }
+.login-title { font-size: 15px; font-weight: 700; color: #222; margin-bottom: 4px; }
+.login-sub { font-size: 10.5px; color: #777; margin-bottom: 20px; }
+.login-field { margin-bottom: 10px; }
+.login-field label { font-size: 10px; color: #666; font-weight: 600; display: block; margin-bottom: 3px; }
+.login-field input {
+  width: 100%; border: 1px solid #ccc; border-radius: 6px; padding: 8px 10px;
+  font-size: 11.5px; color: #333; outline: none;
+}
+.login-field input:focus { border-color: #1565c0; }
+.login-divider { text-align: center; font-size: 10px; color: #bbb; margin: 10px 0; }
+.login-note { font-size: 9.5px; color: #999; text-align: center; margin-top: 10px; line-height: 1.4; }
+
+/* QR SCAN SCREEN */
+.qr-scan-screen { background: #111; min-height: 580px; position: relative; display: flex; flex-direction: column; }
+.qr-scan-header { background: rgba(0,0,0,0.7); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; }
+.qr-cancel { color: #90caf9; font-size: 11px; font-weight: 600; cursor: pointer; }
+.qr-viewfinder-area { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.qr-frame {
+  width: 180px; height: 180px; position: relative;
+}
+.qr-corner {
+  position: absolute; width: 24px; height: 24px;
+  border-color: #4fc3f7; border-style: solid;
+}
+.qr-corner.tl { top: 0; left: 0; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
+.qr-corner.tr { top: 0; right: 0; border-width: 3px 3px 0 0; border-radius: 0 4px 0 0; }
+.qr-corner.bl { bottom: 0; left: 0; border-width: 0 0 3px 3px; border-radius: 0 0 0 4px; }
+.qr-corner.br { bottom: 0; right: 0; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+.qr-scan-line {
+  position: absolute; top: 50%; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, #4fc3f7, transparent);
+}
+.qr-instruction { color: rgba(255,255,255,0.75); font-size: 11px; text-align: center; padding: 0 20px 30px; line-height: 1.5; }
+
+/* CAMERA SCREEN */
+.camera-screen { background: #000; min-height: 580px; display: flex; flex-direction: column; position: relative; }
+.camera-header { background: rgba(0,0,0,0.6); padding: 8px 14px; display: flex; justify-content: space-between; align-items: center; }
+.camera-stage-badge { background: #ff9800; color: white; font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 10px; }
+.camera-so-label { color: rgba(255,255,255,0.7); font-size: 10px; }
+.camera-viewfinder {
+  flex: 1; background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+  display: flex; align-items: center; justify-content: center; position: relative;
+}
+.camera-grid-lines {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 33.3% 33.3%;
+}
+.camera-device-silhouette { font-size: 60px; opacity: 0.3; }
+.camera-controls {
+  background: rgba(0,0,0,0.8); padding: 14px; display: flex; align-items: center; justify-content: space-between;
+}
+.camera-cancel-btn { color: white; font-size: 11px; font-weight: 600; }
+.shutter-btn {
+  width: 60px; height: 60px; border-radius: 50%; background: white;
+  border: 4px solid rgba(255,255,255,0.4); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.2);
+}
+.shutter-inner { width: 48px; height: 48px; border-radius: 50%; background: white; }
+.camera-flip { color: white; font-size: 20px; cursor: pointer; }
+
+/* PHOTO DETAIL */
+.photo-detail-screen { background: #111; min-height: 580px; display: flex; flex-direction: column; }
+.photo-detail-header { background: rgba(0,0,0,0.8); padding: 8px 14px; display: flex; justify-content: space-between; align-items: center; }
+.photo-detail-back { color: #90caf9; font-size: 11px; font-weight: 600; }
+.photo-detail-title { color: white; font-size: 12px; font-weight: 700; }
+.photo-detail-image { height: 220px; background: linear-gradient(135deg, #1565c0, #42a5f5); display: flex; align-items: center; justify-content: center; font-size: 60px; }
+.photo-detail-meta { background: white; padding: 12px 14px; flex: 1; }
+.meta-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f0f0f0; font-size: 11px; }
+.meta-row:last-of-type { border-bottom: none; }
+.meta-label { color: #888; }
+.meta-value { color: #333; font-weight: 600; }
+.notes-area { margin-top: 8px; }
+.notes-label { font-size: 10px; color: #888; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.notes-input { width: 100%; border: 1px solid #ddd; border-radius: 6px; padding: 7px 9px; font-size: 11px; color: #333; resize: none; height: 50px; font-family: inherit; }
+.notes-hint { font-size: 9.5px; color: #bbb; margin-top: 3px; }
+.photo-detail-actions { background: white; padding: 10px 14px; border-top: 1px solid #eee; display: flex; gap: 0; }
+
+/* CAPTION BOX */
+.caption-box {
+  background: white;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-top: 14px;
+  width: 320px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.caption-screen-id { font-size: 10px; font-weight: 700; color: #1565c0; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.caption-title { font-size: 13px; font-weight: 700; color: #222; margin-bottom: 6px; }
+.caption-text { font-size: 11px; color: #555; line-height: 1.55; margin-bottom: 8px; }
+.caption-buttons { border-top: 1px solid #f0f0f0; padding-top: 8px; }
+.caption-btn-row { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 5px; font-size: 10.5px; color: #444; line-height: 1.45; }
+.caption-btn-row:last-child { margin-bottom: 0; }
+.btn-tag {
+  flex-shrink: 0; font-size: 9px; font-weight: 700; padding: 1px 7px; border-radius: 4px;
+  background: #e3f0ff; color: #1565c0; border: 1px solid #90b4e8; white-space: nowrap;
+}
+.btn-tag.red { background: #fde8e8; color: #c62828; border-color: #ef9a9a; }
+.btn-tag.orange { background: #fff3e0; color: #e65100; border-color: #ffcc80; }
+.btn-tag.green { background: #e8f5e9; color: #2e7d32; border-color: #a5d6a7; }
+.btn-tag.gray { background: #f5f5f5; color: #555; border-color: #ccc; }
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <h1>BMES Capture App — Mobile Screen Designs</h1>
+  <p>All phone screens shown in sequence. Each screen includes a caption describing the user action, system behavior, and button definitions for the developer.</p>
+</div>
+
+<div class="screens-grid">
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN A: LOGIN -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="screen-card">
+  <div class="screen-label">Screen A</div>
+  <div class="phone">
+    <div class="phone-notch"><div class="notch-pill"></div></div>
+    <div class="phone-screen">
+      <div class="login-screen">
+        <div class="login-logo-area">
+          <!-- BMES LOGO SVG -->
+          <svg width="160" height="52" viewBox="0 0 200 65" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="44" height="44" rx="8" fill="none" stroke="#1565c0" stroke-width="3.5"/>
+            <polyline points="6,24 13,24 17,10 22,38 27,18 31,28 35,14 40,24 48,24" fill="none" stroke="#1565c0" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="58" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="30" fill="#1565c0">BMES</text>
+            <text x="58" y="50" font-family="Arial" font-style="italic" font-size="11.5" fill="#1565c0" letter-spacing="1.2">BEYOND THE EXPECTED®</text>
+          </svg>
+        </div>
+        <div class="login-title">Sign In to Capture App</div>
+        <div class="login-sub">Use your Acumatica account credentials</div>
+        <div class="login-field">
+          <label>Acumatica Site URL</label>
+          <input type="text" value="https://bmes.acumatica.com" />
+        </div>
+        <div class="login-field">
+          <label>Username</label>
+          <input type="text" value="john.tariq" />
+        </div>
+        <div class="login-field">
+          <label>Password</label>
+          <input type="password" value="••••••••" />
+        </div>
+        <div style="margin-top:14px;">
+          <div class="btn-primary" style="border-radius:8px;">🔐 Sign In Securely</div>
+        </div>
+        <div class="login-note">Your credentials are authenticated directly against Acumatica.<br>The app does not store your password.</div>
+      </div>
+    </div>
+  </div>
+  <div class="caption-box">
+    <div class="caption-screen-id">Screen A — Login</div>
+    <div class="caption-title">First-Time Sign In</div>
+    <div class="caption-text">Shown only on first launch or after session expiry. The user enters their Acumatica site URL and credentials. The app authenticates via Acumatica's OAuth 2.0 endpoint. On success, a session token is stored on the device and the user is not prompted again until the token expires.</div>
+    <div class="caption-buttons">
+      <div class="caption-btn-row"><span class="btn-tag">Sign In Securely</span> Submits credentials to Acumatica OAuth endpoint. On success, navigates to the Queue screen. On failure, displays an inline error message with the reason returned by Acumatica.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN B: QUEUE -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="screen-card">
+  <div class="screen-label">Screen B</div>
+  <div class="phone">
+    <div class="phone-notch"><div class="notch-pill"></div></div>
+    <div class="phone-screen">
+      <div class="app-header">
+        <div class="app-header-top">
+          <svg width="80" height="26" viewBox="0 0 200 65" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="44" height="44" rx="8" fill="none" stroke="white" stroke-width="3.5"/>
+            <polyline points="6,24 13,24 17,10 22,38 27,18 31,28 35,14 40,24 48,24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="58" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="30" fill="white">BMES</text>
+            <text x="58" y="50" font-family="Arial" font-style="italic" font-size="11.5" fill="rgba(255,255,255,0.8)" letter-spacing="1.2">BEYOND THE EXPECTED®</text>
+          </svg>
+          <div class="user-chip">👤 John Tariq</div>
+        </div>
+      </div>
+      <div class="app-content">
+        <div class="section-title" style="margin-bottom:8px;">Pending Capture — 4 Orders</div>
+        <div class="queue-item">
+          <div class="queue-stage-dot" style="background:#ff9800;"></div>
+          <div class="queue-info">
+            <div class="queue-so">SO004521</div>
+            <div class="queue-cust">Riverside Electronics Service</div>
+            <div class="queue-chips">
+              <span class="chip chip-done">Before ✓</span>
+              <span class="chip chip-pending">WIP</span>
+              <span class="chip chip-pending">After</span>
+            </div>
+          </div>
+          <div class="queue-arrow">›</div>
+        </div>
+        <div class="queue-item">
+          <div class="queue-stage-dot" style="background:#c62828;"></div>
+          <div class="queue-info">
+            <div class="queue-so">SO004518</div>
+            <div class="queue-cust">TechCare Solutions</div>
+            <div class="queue-chips">
+              <span class="chip chip-pending">Before</span>
+              <span class="chip chip-pending">WIP</span>
+              <span class="chip chip-pending">After</span>
+            </div>
+          </div>
+          <div class="queue-arrow">›</div>
+        </div>
+        <div class="queue-item">
+          <div class="queue-stage-dot" style="background:#1565c0;"></div>
+          <div class="queue-info">
+            <div class="queue-so">SO004510</div>
+            <div class="queue-cust">Metro Repair Hub</div>
+            <div class="queue-chips">
+              <span class="chip chip-done">Before ✓</span>
+              <span class="chip chip-done">WIP ✓</span>
+              <span class="chip chip-pending">After</span>
+            </div>
+          </div>
+          <div class="queue-arrow">›</div>
+        </div>
+        <div class="queue-item">
+          <div class="queue-stage-dot" style="background:#ff9800;"></div>
+          <div class="queue-info">
+            <div class="queue-so">SO004505</div>
+            <div class="queue-cust">Sunrise Device Repair</div>
+            <div class="queue-chips">
+              <span class="chip chip-done">Before ✓</span>
+              <span class="chip chip-pending">WIP</span>
+              <span class="chip chip-pending">After</span>
+            </div>
+          </div>
+          <div class="queue-arrow">›</div>
+        </div>
+        <div style="margin-top:10px;">
+          <div class="btn-scan">📷 Scan QR Code to Open Order</div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-icon">📷</div><div class="nav-lbl">Capture</div></div>
+        <div class="nav-item"><div class="nav-icon active">🗂</div><div class="nav-lbl active">Queue</div></div>
+        <div class="nav-item"><div class="nav-icon">🔍</div><div class="nav-lbl">Search SO</div></div>
+        <div class="nav-item"><div class="nav-icon">👤</div><div class="nav-lbl">Profile</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="caption-box">
+    <div class="caption-screen-id">Screen B — Queue</div>
+    <div class="caption-title">Pending Capture Worklist</div>
+    <div class="caption-text">Shown after login. Lists all Sales Orders that have one or more stages with zero photos captured. Sorted by urgency: all-pending orders first, then partial. The colored dot indicates the current active stage. Tapping any order opens it directly at the pending stage.</div>
+    <div class="caption-buttons">
+      <div class="caption-btn-row"><span class="btn-tag">Order Row Tap</span> Opens the SO on the Capture screen at the first incomplete stage. No QR code required from this entry point.</div>
+      <div class="caption-btn-row"><span class="btn-tag">Scan QR Code</span> Opens the device camera in QR scan mode. Scans the code on the desktop Acumatica screen and loads that specific order.</div>
+      <div class="caption-btn-row"><span class="btn-tag gray">Queue Tab</span> Returns to this worklist from anywhere in the app.</div>
+      <div class="caption-btn-row"><span class="btn-tag gray">Search SO Tab</span> Opens a manual search field to find an order by number or customer name.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN C: QR SCAN -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="screen-card">
+  <div class="screen-label">Screen C</div>
+  <div class="phone">
+    <div class="phone-notch"><div class="notch-pill"></div></div>
+    <div class="phone-screen">
+      <div class="qr-scan-screen">
+        <div class="qr-scan-header">
+          <svg width="60" height="20" viewBox="0 0 200 65" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="44" height="44" rx="8" fill="none" stroke="white" stroke-width="3.5"/>
+            <polyline points="6,24 13,24 17,10 22,38 27,18 31,28 35,14 40,24 48,24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="58" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="30" fill="white">BMES</text>
+          </svg>
+          <div class="qr-cancel">Cancel</div>
+        </div>
+        <div style="color:rgba(255,255,255,0.6);font-size:11px;text-align:center;padding:14px 0 6px;">Scan the QR code on the Sales Order screen</div>
+        <div class="qr-viewfinder-area">
+          <div class="qr-frame">
+            <div class="qr-corner tl"></div>
+            <div class="qr-corner tr"></div>
+            <div class="qr-corner bl"></div>
+            <div class="qr-corner br"></div>
+            <div class="qr-scan-line"></div>
+            <!-- Mini QR inside viewfinder -->
+            <div style="position:absolute;inset:20px;display:flex;align-items:center;justify-content:center;opacity:0.25;">
+              <svg width="100" height="100" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+                <rect x="10" y="10" width="40" height="40" fill="white" rx="2"/>
+                <rect x="16" y="16" width="28" height="28" fill="#111" rx="1"/>
+                <rect x="110" y="10" width="40" height="40" fill="white" rx="2"/>
+                <rect x="116" y="16" width="28" height="28" fill="#111" rx="1"/>
+                <rect x="10" y="110" width="40" height="40" fill="white" rx="2"/>
+                <rect x="16" y="116" width="28" height="28" fill="#111" rx="1"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+        <div class="qr-instruction">Hold your phone steady over the QR code shown on the Acumatica Sales Order screen. The order will load automatically.</div>
+      </div>
+    </div>
+  </div>
+  <div class="caption-box">
+    <div class="caption-screen-id">Screen C — QR Scan</div>
+    <div class="caption-title">Scanning the Sales Order QR Code</div>
+    <div class="caption-text">Triggered from the Queue screen or the Scan New Order button. The device camera opens in QR scan mode. The user points it at the QR code displayed in the Acumatica SO header. On successful scan, the app decodes the SO number and current active stage from the URL and navigates directly to that order's capture screen.</div>
+    <div class="caption-buttons">
+      <div class="caption-btn-row"><span class="btn-tag">Auto Scan</span> No button press needed. The moment a valid BMES QR code is detected, the app navigates automatically. Invalid QR codes are ignored.</div>
+      <div class="caption-btn-row"><span class="btn-tag gray">Cancel</span> Closes the camera and returns to the previous screen without loading any order.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN D: SO LOADED, BEFORE, EMPTY -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="screen-card">
+  <div class="screen-label">Screen D</div>
+  <div class="phone">
+    <div class="phone-notch"><div class="notch-pill"></div></div>
+    <div class="phone-screen">
+      <div class="app-header">
+        <div class="app-header-top">
+          <svg width="80" height="26" viewBox="0 0 200 65" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="44" height="44" rx="8" fill="none" stroke="white" stroke-width="3.5"/>
+            <polyline points="6,24 13,24 17,10 22,38 27,18 31,28 35,14 40,24 48,24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="58" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="30" fill="white">BMES</text>
+          </svg>
+          <div class="user-chip">👤 John Tariq</div>
+        </div>
+        <div class="so-card">
+          <div class="so-num">SO004521</div>
+          <div class="so-cust">Riverside Electronics Service</div>
+          <div class="so-meta">
+            <div class="so-meta-item"><span class="so-dot"></span>In Processing</div>
+            <div class="so-meta-item">📅 05 May 2026</div>
+          </div>
+        </div>
+      </div>
+      <div class="stage-tabs">
+        <div class="stab active"><div class="stab-label">● Before</div><div class="stab-count">0 photos</div></div>
+        <div class="stab"><div class="stab-label">WIP</div><div class="stab-count">0 photos</div></div>
+        <div class="stab"><div class="stab-label">After</div><div class="stab-count">0 photos</div></div>
+      </div>
+      <div class="app-content">
+        <div class="stage-card">
+          <div class="stage-card-title"><span class="sdot-orange"></span>Before — Intake Condition</div>
+          <div class="stage-card-sub">Capture the device as received. Show all visible damage, scratches, or defects.</div>
+        </div>
+        <div class="section-title">Captured So Far</div>
+        <div class="empty-state">
+          <div class="empty-icon">📭</div>
+          <div class="empty-text">No Before photos yet.<br>Tap the button below to start.</div>
+        </div>
+        <div class="btn-primary">📷 Take Before Photo</div>
+        <div class="btn-secondary">🖼 Upload from Gallery</div>
+        <div class="btn-scan">📷 Scan New Order</div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-icon active">📷</div><div class="nav-lbl active">Capture</div></div>
+        <div class="nav-item"><div class="nav-icon">🗂</div><div class="nav-lbl">Queue</div></div>
+        <div class="nav-item"><div class="nav-icon">🔍</div><div class="nav-lbl">Search SO</div></div>
+        <div class="nav-item"><div class="nav-icon">👤</div><div class="nav-lbl">Profile</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="caption-box">
+    <div class="caption-screen-id">Screen D — Capture, Before, Empty</div>
+    <div class="caption-title">Order Loaded, No Photos Yet</div>
+    <div class="caption-text">The order is loaded after QR scan or Queue tap. Before tab is active with zero photos. The stage description tells the technician what kind of photos to take at this stage.</div>
+    <div class="caption-buttons">
+      <div class="caption-btn-row"><span class="btn-tag">Take Before Photo</span> Opens the device camera in full-screen capture mode (Screen E). After capture, photo is immediately pushed to Acumatica and appears as Photo 1.</div>
+      <div class="caption-btn-row"><span class="btn-tag">Upload from Gallery</span> Opens the device photo library. User selects one or more existing photos. Each selected photo is pushed to Acumatica under the Before stage in sequence.</div>
+      <div class="caption-btn-row"><span class="btn-tag">Scan New Order</span> Opens the QR scanner (Screen C) to load a different order without going back to the Queue.</div>
+      <div class="caption-btn-row"><span class="btn-tag gray">Before / WIP / After Tabs</span> Switch between stages manually. The active stage is highlighted in blue. Completed stages show a green check.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN E: CAMERA ACTIVE -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="screen-card">
+  <div class="screen-label">Screen E</div>
+  <div class="phone">
+    <div class="phone-notch"><div class="notch-pill"></div></div>
+    <div class="phone-screen">
+      <div class="camera-screen">
+        <div class="camera-header">
+          <div class="camera-stage-badge">● BEFORE</div>
+          <div class="camera-so-label">SO004521</div>
+          <div style="color:rgba(255,255,255,0.5);font-size:10px;">Photo 1</div>
+        </div>
+        <div class="camera-viewfinder">
+          <div class="camera-grid-lines"></div>
+          <div class="camera-device-silhouette">💻</div>
+        </div>
+        <div style="background:rgba(0,0,0,0.7);padding:6px 14px;display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:rgba(255,255,255,0.5);font-size:9.5px;">SO004521 · BEFORE · Photo 1</span>
+          <span style="color:#4fc3f7;font-size:9.5px;">720p</span>
+        </div>
+        <div class="camera-controls">
+          <div class="camera-cancel-btn">Cancel</div>
+          <div class="shutter-btn"><div class="shutter-inner"></div></div>
+          <div class="camera-flip">🔄</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="caption-box">
+    <div class="caption-screen-id">Screen E — Camera Active</div>
+    <div class="caption-title">Full-Screen Camera, Ready to Capture</div>
+    <div class="caption-text">Full-screen camera view using the device rear camera. The stage badge and SO number are shown at the top so the technician always knows which order and stage they are capturing for. The grid lines help with framing.</div>
+    <div class="caption-buttons">
+      <div class="caption-btn-row"><span class="btn-tag">Shutter Button</span> Takes the photo. Camera stays open for the next shot. The photo is immediately pushed to Acumatica in the background. The photo count in the stage tab increments.</div>
+      <div class="caption-btn-row"><span class="btn-tag gray">Flip</span> Switches between rear and front camera.</div>
+      <div class="caption-btn-row"><span class="btn-tag gray">Cancel</span> Closes the camera and returns to the Capture screen without saving any photo.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN F: PHOTO TAKEN, SYNC CONFIRMED -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="screen-card">
+  <div class="screen-label">Screen F</div>
+  <div class="phone">
+    <div class="phone-notch"><div class="notch-pill"></div></div>
+    <div class="phone-screen">
+      <div class="app-header">
+        <div class="app-header-top">
+          <svg width="80" height="26" viewBox="0 0 200 65" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="44" height="44" rx="8" fill="none" stroke="white" stroke-width="3.5"/>
+            <polyline points="6,24 13,24 17,10 22,38 27,18 31,28 35,14 40,24 48,24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="58" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="30" fill="white">BMES</text>
+          </svg>
+          <div class="user-chip">👤 John Tariq</div>
+        </div>
+        <div class="so-card">
+          <div class="so-num">SO004521</div>
+          <div class="so-cust">Riverside Electronics Service</div>
+        </div>
+      </div>
+      <div class="stage-tabs">
+        <div class="stab active"><div class="stab-label">● Before</div><div class="stab-count">3 photos</div></div>
+        <div class="stab"><div class="stab-label">WIP</div><div class="stab-count">0 photos</div></div>
+        <div class="stab"><div class="stab-label">After</div><div class="stab-count">0 photos</div></div>
+      </div>
+      <div class="app-content">
+        <div class="sync-row">✅ Photo 3 synced to Acumatica successfully</div>
+        <div class="section-title">3 Photos Captured</div>
+        <div class="photos-grid">
+          <div class="photo-thumb"><div class="thumb-bg" style="background:linear-gradient(135deg,#42a5f5,#1565c0);">💻</div><div class="thumb-del">×</div><div class="thumb-count">Photo 1</div></div>
+          <div class="photo-thumb"><div class="thumb-bg" style="background:linear-gradient(135deg,#66bb6a,#2e7d32);">💻</div><div class="thumb-del">×</div><div class="thumb-count">Photo 2</div></div>
+          <div class="photo-thumb"><div class="thumb-bg" style="background:linear-gradient(135deg,#ab47bc,#6a1b9a);">💻</div><div class="thumb-del">×</div><div class="thumb-count">Photo 3</div></div>
+          <div class="thumb-add">+</div>
+        </div>
+        <div class="btn-primary">📷 Take Another Before Photo</div>
+        <div class="btn-secondary">🖼 Upload from Gallery</div>
+        <div class="btn-scan">📷 Scan New Order</div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-icon active">📷</div><div class="nav-lbl active">Capture</div></div>
+        <div class="nav-item"><div class="nav-icon">🗂</div><div class="nav-lbl">Queue</div></div>
+        <div class="nav-item"><div class="nav-icon">🔍</div><div class="nav-lbl">Search SO</div></div>
+        <div class="nav-item"><div class="nav-icon">👤</div><div class="nav-lbl">Profile</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="caption-box">
+    <div class="caption-screen-id">Screen F — Photos Captured, Sync Confirmed</div>
+    <div class="caption-title">3 Before Photos Taken and Synced</div>
+    <div class="caption-text">After each capture, a green sync banner confirms the photo was successfully pushed to Acumatica. The photo appears as a numbered thumbnail. The + tile allows adding more. Tapping any thumbnail opens the Photo Detail screen. The technician can continue capturing or switch to the next stage tab.</div>
+    <div class="caption-buttons">
+      <div class="caption-btn-row"><span class="btn-tag">Take Another Before Photo</span> Opens the camera again for this stage. Next photo will be Photo 4.</div>
+      <div class="caption-btn-row"><span class="btn-tag">Thumbnail Tap</span> Opens Photo Detail screen (Screen H) showing full image, metadata, Notes field, Delete and Delete and Retake buttons.</div>
+      <div class="caption-btn-row"><span class="btn-tag gray">× on Thumbnail</span> Shortcut to delete that photo directly from the thumbnail view. Shows a confirmation prompt before deleting from Acumatica.</div>
+      <div class="caption-btn-row"><span class="btn-tag gray">+ Tile</span> Same as Take Another Photo button.</div>
+      <div class="caption-btn-row"><span class="btn-tag gray">WIP / After Tabs</span> Tap to switch to that stage and begin capturing for it.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN G: WIP ACTIVE, EMPTY -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="screen-card">
+  <div class="screen-label">Screen G</div>
+  <div class="phone">
+    <div class="phone-notch"><div class="notch-pill"></div></div>
+    <div class="phone-screen">
+      <div class="app-header">
+        <div class="app-header-top">
+          <svg width="80" height="26" viewBox="0 0 200 65" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="44" height="44" rx="8" fill="none" stroke="white" stroke-width="3.5"/>
+            <polyline points="6,24 13,24 17,10 22,38 27,18 31,28 35,14 40,24 48,24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="58" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="30" fill="white">BMES</text>
+          </svg>
+          <div class="user-chip">👤 John Tariq</div>
+        </div>
+        <div class="so-card">
+          <div class="so-num">SO004521</div>
+          <div class="so-cust">Riverside Electronics Service</div>
+        </div>
+      </div>
+      <div class="stage-tabs">
+        <div class="stab done"><div class="stab-label">✓ Before</div><div class="stab-count">3 photos</div></div>
+        <div class="stab active"><div class="stab-label">● WIP</div><div class="stab-count">0 photos</div></div>
+        <div class="stab"><div class="stab-label">After</div><div class="stab-count">0 photos</div></div>
+      </div>
+      <div class="app-content">
+        <div class="stage-card">
+          <div class="stage-card-title"><span class="sdot-orange"></span>Work In Progress (WIP)</div>
+          <div class="stage-card-sub">Capture device during active repair. Show disassembly, internal components, or corrosion if present.</div>
+        </div>
+        <div class="section-title">Captured So Far</div>
+        <div class="empty-state">
+          <div class="empty-icon">🔧</div>
+          <div class="empty-text">No WIP photos yet.<br>Tap below to capture.</div>
+        </div>
+        <div class="btn-primary">📷 Take WIP Photo</div>
+        <div class="btn-secondary">🖼 Upload from Gallery</div>
+        <div class="btn-scan">📷 Scan New Order</div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-item"><div class="nav-icon active">📷</div><div class="nav-lbl active">Capture</div></div>
+        <div class="nav-item"><div class="nav-icon">🗂</div><div class="nav-lbl">Queue</div></div>
+        <div class="nav-item"><div class="nav-icon">🔍</div><div class="nav-lbl">Search SO</div></div>
+        <div class="nav-item"><div class="nav-icon">👤</div><div class="nav-lbl">Profile</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="caption-box">
+    <div class="caption-screen-id">Screen G — WIP Stage, Empty</div>
+    <div class="caption-title">Before Complete, WIP Stage Active</div>
+    <div class="caption-text">The technician has switched to the WIP tab. Before shows a green check confirming it is complete. WIP is now active with zero photos. The stage description changes to guide the technician on what to capture at this point in the repair cycle.</div>
+    <div class="caption-buttons">
+      <div class="caption-btn-row"><span class="btn-tag">Take WIP Photo</span> Opens the camera labeled as WIP stage. Captures and pushes immediately to Acumatica under the WIP category.</div>
+      <div class="caption-btn-row"><span class="btn-tag">Upload from Gallery</span> Opens the device photo library. Uploaded photos are stored under WIP in Acumatica.</div>
+      <div class="caption-btn-row"><span class="btn-tag green">✓ Before Tab</span> Indicates Before is complete. Tapping it returns to Before if the technician needs to add or review photos.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- SCREEN H: PHOTO DETAIL VIEW -->
+<!-- ═══════════════════════════════════════════ -->
+<div class="screen-card">
+  <div class="screen-label">Screen H</div>
+  <div class="phone">
+    <div class="phone-notch"><div class="notch-pill"></div></div>
+    <div class="phone-screen">
+      <div class="photo-detail-screen">
+        <div class="photo-detail-header">
+          <div class="photo-detail-back">‹ Back</div>
+          <div class="photo-detail-title">Before — Photo 2</div>
+          <div style="width:40px;"></div>
+        </div>
+        <div class="photo-detail-image">💻</div>
+        <div class="photo-detail-meta">
+          <div class="meta-row"><span class="meta-label">Stage</span><span class="meta-value">Before</span></div>
+          <div class="meta-row"><span class="meta-label">Photo Number</span><span class="meta-value">Photo 2 of 3</span></div>
+          <div class="meta-row"><span class="meta-label">Captured By</span><span class="meta-value">John Tariq</span></div>
+          <div class="meta-row"><span class="meta-label">Captured On</span><span class="meta-value">05 May 2026, 9:11 AM</span></div>
+          <div class="meta-row"><span class="meta-label">Device</span><span class="meta-value">iPad Air (Safari)</span></div>
+          <div class="meta-row"><span class="meta-label">Synced to Acumatica</span><span class="meta-value" style="color:#2e7d32;">✓ Yes</span></div>
+          <div class="notes-area">
+            <div class="notes-label">Notes (optional)</div>
+            <textarea class="notes-input" placeholder="e.g. Cracked screen visible top-left corner...">Cracked screen, top-left corner.</textarea>
+            <div class="notes-hint">Notes are saved to Acumatica and visible on the SO Pictures tab.</div>
+          </div>
+        </div>
+        <div class="photo-detail-actions">
+          <div class="btn-danger">🗑 Delete</div>
+          <div class="btn-warning">🔄 Delete &amp; Retake</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="caption-box">
+    <div class="caption-screen-id">Screen H — Photo Detail</div>
+    <div class="caption-title">View, Annotate, Delete, or Retake a Photo</div>
+    <div class="caption-text">Opened by tapping any thumbnail. Shows the full-size image with all metadata. The Notes field is the only editable element. Notes entered here are written back to the corresponding record in Acumatica and appear in the SO Pictures tab sub-grid visible to the CSR.</div>
+    <div class="caption-buttons">
+      <div class="caption-btn-row"><span class="btn-tag gray">Notes Field</span> Editable text. Saved to Acumatica automatically on blur (when the user taps elsewhere). No separate save button needed.</div>
+      <div class="caption-btn-row"><span class="btn-tag red">Delete</span> Shows a confirmation prompt: "Delete this photo from Acumatica? This cannot be undone." On confirm, the file is deleted from Acumatica, the photo count decrements, and the user returns to the Capture screen.</div>
+      <div class="caption-btn-row"><span class="btn-tag orange">Delete and Retake</span> Deletes the photo from Acumatica immediately, then opens the camera in the same stage so the replacement photo is captured in one continuous action. No extra navigation required.</div>
+      <div class="caption-btn-row"><span class="btn-tag gray">‹ Back</span> Returns to the Capture screen without making any changes.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end grid -->
+</body>
+</html>

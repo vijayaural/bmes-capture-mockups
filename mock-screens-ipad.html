@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BMES Capture App — iPad Mock Screens</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: #f0f2f5;
+  padding: 40px 30px;
+  color: #222;
+}
+.page-title { text-align:center; margin-bottom:40px; }
+.page-title h1 { font-size:22px; font-weight:700; color:#1565c0; margin-bottom:6px; }
+.page-title p { font-size:13px; color:#666; }
+
+.ipad-section { margin-bottom:60px; display:flex; flex-direction:column; align-items:center; }
+.screen-label {
+  font-size:11px; font-weight:700; color:#1565c0; text-transform:uppercase;
+  letter-spacing:0.08em; margin-bottom:10px; background:#e3f0ff;
+  padding:3px 14px; border-radius:10px;
+}
+
+/* IPAD FRAME */
+.ipad {
+  width: 900px;
+  background: #f2f4f7;
+  border-radius: 22px;
+  border: 10px solid #1a1a1a;
+  box-shadow: 0 20px 70px rgba(0,0,0,0.3), inset 0 0 0 1.5px #333;
+  overflow: hidden;
+}
+.ipad-home-bar {
+  background: #1a1a1a;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.ipad-pill { background:#333; width:80px; height:10px; border-radius:5px; }
+.ipad-screen { display:flex; flex-direction:column; min-height:620px; }
+
+/* APP HEADER */
+.ipad-header {
+  background: #1565c0;
+  padding: 10px 20px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+.ipad-header-left { display:flex; align-items:center; gap:16px; }
+.so-info-inline { color:white; }
+.so-num { font-size:14px; font-weight:700; }
+.so-cust { font-size:11px; color:rgba(255,255,255,0.8); }
+.so-status { display:inline-block; background:rgba(255,255,255,0.18); border-radius:10px; padding:2px 10px; font-size:10px; color:white; margin-top:3px; }
+.ipad-header-right { display:flex; align-items:center; gap:12px; }
+.user-chip { background:rgba(255,255,255,0.18); border-radius:12px; padding:3px 10px; font-size:11px; color:white; }
+
+/* STAGE TABS — IPAD HORIZONTAL */
+.ipad-stage-tabs {
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  padding: 0 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  flex-shrink: 0;
+}
+.istab {
+  padding: 10px 24px;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.istab-label { font-size:12px; font-weight:700; color:#999; text-transform:uppercase; letter-spacing:0.04em; }
+.istab-count { font-size:11px; color:#bbb; }
+.istab.active { border-bottom-color:#1565c0; }
+.istab.active .istab-label { color:#1565c0; }
+.istab.active .istab-count { color:#1565c0; }
+.istab.done .istab-label { color:#2e7d32; }
+.istab.done .istab-count { color:#2e7d32; }
+
+/* TWO COLUMN LAYOUT */
+.ipad-body {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* LEFT PANEL */
+.ipad-left {
+  border-right: 1px solid #e0e0e0;
+  padding: 14px 16px;
+  background: #f8f9fa;
+  overflow-y: auto;
+}
+.panel-section-title { font-size:10px; font-weight:700; color:#999; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px; }
+
+.stage-detail-card {
+  background:white; border-radius:8px; padding:12px 14px; margin-bottom:12px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.07);
+}
+.sdc-title { font-size:13px; font-weight:700; color:#222; display:flex; align-items:center; gap:7px; margin-bottom:4px; }
+.sdc-desc { font-size:11px; color:#777; line-height:1.5; }
+.sdc-status { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; margin-top:6px; }
+.status-pending { color:#b45309; }
+.status-complete { color:#2e7d32; }
+
+.audit-card {
+  background:white; border-radius:8px; padding:11px 14px; margin-bottom:12px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.07);
+}
+.audit-row { display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid #f0f0f0; font-size:11px; }
+.audit-row:last-child { border-bottom:none; }
+.audit-label { color:#888; }
+.audit-value { color:#333; font-weight:600; }
+
+.thumb-grid { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+.ipad-thumb {
+  width:72px; height:72px; border-radius:8px; overflow:hidden;
+  position:relative; box-shadow:0 1px 3px rgba(0,0,0,0.15);
+}
+.ipad-thumb-bg { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:22px; }
+.ipad-thumb-count {
+  position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.5);
+  color:white; font-size:9px; text-align:center; padding:2px; font-weight:700;
+}
+.ipad-thumb-del {
+  position:absolute; top:2px; right:2px; background:rgba(0,0,0,0.5);
+  color:white; border-radius:50%; width:16px; height:16px;
+  display:flex; align-items:center; justify-content:center; font-size:10px;
+}
+.thumb-add-ipad {
+  width:72px; height:72px; border-radius:8px; background:#f0f0f0;
+  border:2px dashed #ccc; display:flex; align-items:center; justify-content:center;
+  font-size:22px; color:#bbb;
+}
+
+/* RIGHT PANEL — CAPTURE AREA */
+.ipad-right {
+  display: flex;
+  flex-direction: column;
+  background: #111;
+  position: relative;
+}
+.ipad-camera-area {
+  flex: 1;
+  background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.ipad-grid-lines {
+  position:absolute; inset:0;
+  background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 33.3% 33.3%;
+}
+.ipad-device-silhouette { font-size:80px; opacity:0.25; }
+.ipad-stage-overlay {
+  position:absolute; top:16px; left:0; right:0;
+  display:flex; justify-content:center;
+}
+.ipad-stage-badge {
+  background:rgba(0,0,0,0.6); border:1.5px solid #ff9800;
+  color:#ff9800; font-size:11px; font-weight:700;
+  padding:4px 16px; border-radius:20px; letter-spacing:0.08em;
+}
+.ipad-camera-controls {
+  background: rgba(0,0,0,0.85);
+  padding: 16px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ipad-btn-secondary {
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);
+  color:white; padding:10px 18px; border-radius:8px; font-size:11.5px;
+  font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px;
+}
+.ipad-shutter {
+  width:72px; height:72px; border-radius:50%; background:white;
+  border:5px solid rgba(255,255,255,0.3); cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 0 0 2px rgba(255,255,255,0.15);
+}
+.ipad-shutter-inner { width:58px; height:58px; border-radius:50%; background:white; }
+
+/* CAPTION */
+.caption-box {
+  background:white; border-radius:12px; padding:18px 20px; margin-top:16px;
+  width:900px; box-shadow:0 2px 10px rgba(0,0,0,0.08);
+}
+.caption-screen-id { font-size:10px; font-weight:700; color:#1565c0; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px; }
+.caption-title { font-size:14px; font-weight:700; color:#222; margin-bottom:6px; }
+.caption-text { font-size:12px; color:#555; line-height:1.55; margin-bottom:10px; }
+.caption-columns { display:grid; grid-template-columns:1fr 1fr; gap:16px; border-top:1px solid #f0f0f0; padding-top:10px; }
+.caption-col-title { font-size:10px; font-weight:700; color:#999; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:6px; }
+.caption-btn-row { display:flex; align-items:flex-start; gap:6px; margin-bottom:5px; font-size:11px; color:#444; line-height:1.45; }
+.btn-tag { flex-shrink:0; font-size:9px; font-weight:700; padding:1px 7px; border-radius:4px; background:#e3f0ff; color:#1565c0; border:1px solid #90b4e8; white-space:nowrap; }
+.btn-tag.gray { background:#f5f5f5; color:#555; border-color:#ccc; }
+
+/* IPAD QUEUE SCREEN */
+.ipad-queue-body { display:grid; grid-template-columns:1fr 1fr; gap:0; flex:1; }
+.ipad-queue-left { padding:14px 16px; border-right:1px solid #e0e0e0; background:#f8f9fa; overflow-y:auto; }
+.ipad-queue-right { padding:14px 16px; background:white; }
+
+.queue-item {
+  background:white; border-radius:8px; padding:10px 12px; margin-bottom:8px;
+  box-shadow:0 1px 3px rgba(0,0,0,0.07); display:flex; align-items:center; gap:10px; cursor:pointer;
+}
+.queue-item.selected { background:#e8f0fe; border:1.5px solid #90b4e8; }
+.queue-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.queue-info { flex:1; }
+.queue-so { font-size:12px; font-weight:700; color:#222; }
+.queue-cust { font-size:10px; color:#777; margin-top:1px; }
+.queue-chips { display:flex; gap:4px; margin-top:4px; }
+.chip { font-size:9px; font-weight:700; padding:1px 6px; border-radius:8px; border:1px solid; display:inline-block; }
+.chip-pending { color:#b45309; background:#fff8e1; border-color:#ffe082; }
+.chip-done { color:#2e7d32; background:#e8f5e9; border-color:#a5d6a7; }
+.queue-arrow { color:#bbb; font-size:14px; }
+
+/* IPAD LOGIN */
+.ipad-login-body { display:flex; align-items:center; justify-content:center; flex:1; background:white; padding:30px; }
+.ipad-login-card { width:400px; text-align:center; }
+.login-field { margin-bottom:12px; text-align:left; }
+.login-field label { font-size:11px; color:#666; font-weight:600; display:block; margin-bottom:4px; }
+.login-field input { width:100%; border:1px solid #ccc; border-radius:6px; padding:10px 12px; font-size:12.5px; color:#333; outline:none; }
+.ipad-login-btn { width:100%; background:#1565c0; color:white; border:none; border-radius:8px; padding:14px; font-size:13px; font-weight:700; cursor:pointer; margin-top:8px; }
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <h1>BMES Capture App — iPad Screen Designs</h1>
+  <p>iPad layouts use a two-column design. Left panel shows SO details, capture log, and thumbnails. Right panel shows the live camera area and capture controls.</p>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- IPAD SCREEN 1: LOGIN -->
+<!-- ═══════════════════════════════════════ -->
+<div class="ipad-section">
+  <div class="screen-label">iPad Screen A — Login</div>
+  <div class="ipad">
+    <div class="ipad-home-bar"><div class="ipad-pill"></div></div>
+    <div class="ipad-screen">
+      <div class="ipad-login-body">
+        <div class="ipad-login-card">
+          <div style="margin-bottom:24px;">
+            <svg width="220" height="70" viewBox="0 0 200 65" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="2" width="44" height="44" rx="8" fill="none" stroke="#1565c0" stroke-width="3.5"/>
+              <polyline points="6,24 13,24 17,10 22,38 27,18 31,28 35,14 40,24 48,24" fill="none" stroke="#1565c0" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <text x="58" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="30" fill="#1565c0">BMES</text>
+              <text x="58" y="50" font-family="Arial" font-style="italic" font-size="11.5" fill="#1565c0" letter-spacing="1.2">BEYOND THE EXPECTED®</text>
+            </svg>
+          </div>
+          <div style="font-size:17px;font-weight:700;color:#222;margin-bottom:6px;">Sign In to Capture App</div>
+          <div style="font-size:12px;color:#888;margin-bottom:22px;">Authenticate with your Acumatica credentials</div>
+          <div class="login-field"><label>Acumatica Site URL</label><input type="text" value="https://bmes.acumatica.com"/></div>
+          <div class="login-field"><label>Username</label><input type="text" value="john.tariq"/></div>
+          <div class="login-field"><label>Password</label><input type="password" value="••••••••"/></div>
+          <button class="ipad-login-btn">🔐 Sign In Securely</button>
+          <div style="font-size:10.5px;color:#aaa;margin-top:12px;line-height:1.5;">Your credentials are authenticated directly against Acumatica.<br>The app does not store your password.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="caption-box">
+    <div class="caption-screen-id">iPad Screen A — Login</div>
+    <div class="caption-title">First-Time Authentication on iPad</div>
+    <div class="caption-text">Identical behavior to the phone login. The iPad login uses a centered card layout to make better use of the wider screen. After successful authentication, the session token persists on the device. The login screen is not shown again until the token expires or the user logs out from the Profile tab.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- IPAD SCREEN 2: QUEUE -->
+<!-- ═══════════════════════════════════════ -->
+<div class="ipad-section">
+  <div class="screen-label">iPad Screen B — Queue</div>
+  <div class="ipad">
+    <div class="ipad-home-bar"><div class="ipad-pill"></div></div>
+    <div class="ipad-screen">
+      <div class="ipad-header">
+        <div class="ipad-header-left">
+          <svg width="90" height="28" viewBox="0 0 200 65" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="44" height="44" rx="8" fill="none" stroke="white" stroke-width="3.5"/>
+            <polyline points="6,24 13,24 17,10 22,38 27,18 31,28 35,14 40,24 48,24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="58" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="30" fill="white">BMES</text>
+            <text x="58" y="50" font-family="Arial" font-style="italic" font-size="11.5" fill="rgba(255,255,255,0.7)" letter-spacing="1.2">BEYOND THE EXPECTED®</text>
+          </svg>
+          <div style="color:white;font-size:13px;font-weight:600;">Capture Queue</div>
+        </div>
+        <div class="ipad-header-right">
+          <div style="background:rgba(255,255,255,0.15);color:white;border-radius:8px;padding:5px 12px;font-size:11px;cursor:pointer;">📷 Scan QR Code</div>
+          <div class="user-chip">👤 John Tariq</div>
+        </div>
+      </div>
+      <div class="ipad-queue-body" style="flex:1;">
+        <!-- LEFT: List -->
+        <div class="ipad-queue-left">
+          <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">4 Orders Pending</div>
+          <div class="queue-item selected">
+            <div class="queue-dot" style="background:#ff9800;"></div>
+            <div class="queue-info">
+              <div class="queue-so">SO004521</div>
+              <div class="queue-cust">Riverside Electronics</div>
+              <div class="queue-chips"><span class="chip chip-done">Before ✓</span><span class="chip chip-pending">WIP</span><span class="chip chip-pending">After</span></div>
+            </div>
+            <div class="queue-arrow" style="color:#1565c0;">›</div>
+          </div>
+          <div class="queue-item">
+            <div class="queue-dot" style="background:#c62828;"></div>
+            <div class="queue-info">
+              <div class="queue-so">SO004518</div>
+              <div class="queue-cust">TechCare Solutions</div>
+              <div class="queue-chips"><span class="chip chip-pending">Before</span><span class="chip chip-pending">WIP</span><span class="chip chip-pending">After</span></div>
+            </div>
+            <div class="queue-arrow">›</div>
+          </div>
+          <div class="queue-item">
+            <div class="queue-dot" style="background:#1565c0;"></div>
+            <div class="queue-info">
+              <div class="queue-so">SO004510</div>
+              <div class="queue-cust">Metro Repair Hub</div>
+              <div class="queue-chips"><span class="chip chip-done">Before ✓</span><span class="chip chip-done">WIP ✓</span><span class="chip chip-pending">After</span></div>
+            </div>
+            <div class="queue-arrow">›</div>
+          </div>
+          <div class="queue-item">
+            <div class="queue-dot" style="background:#ff9800;"></div>
+            <div class="queue-info">
+              <div class="queue-so">SO004505</div>
+              <div class="queue-cust">Sunrise Device Repair</div>
+              <div class="queue-chips"><span class="chip chip-done">Before ✓</span><span class="chip chip-pending">WIP</span><span class="chip chip-pending">After</span></div>
+            </div>
+            <div class="queue-arrow">›</div>
+          </div>
+        </div>
+        <!-- RIGHT: Selected SO Detail -->
+        <div class="ipad-queue-right">
+          <div style="font-size:13px;font-weight:700;color:#222;margin-bottom:2px;">SO004521</div>
+          <div style="font-size:11px;color:#888;margin-bottom:12px;">Riverside Electronics Service · In Processing</div>
+          <div style="font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">Stage Summary</div>
+          <div style="background:#e8f5e9;border-radius:8px;padding:10px 12px;margin-bottom:8px;">
+            <div style="font-size:12px;font-weight:700;color:#2e7d32;margin-bottom:2px;">✓ Before — 3 photos</div>
+            <div style="font-size:10.5px;color:#555;">Captured by John Tariq · 05 May, 9:14 AM</div>
+          </div>
+          <div style="background:#fff8e1;border-radius:8px;padding:10px 12px;margin-bottom:8px;">
+            <div style="font-size:12px;font-weight:700;color:#b45309;margin-bottom:2px;">● WIP — 0 photos · Pending</div>
+            <div style="font-size:10.5px;color:#555;">No photos captured yet</div>
+          </div>
+          <div style="background:#fff8e1;border-radius:8px;padding:10px 12px;margin-bottom:16px;">
+            <div style="font-size:12px;font-weight:700;color:#b45309;margin-bottom:2px;">● After — 0 photos · Pending</div>
+            <div style="font-size:10.5px;color:#555;">No photos captured yet</div>
+          </div>
+          <div style="background:#1565c0;color:white;border:none;border-radius:8px;padding:12px;font-size:12.5px;font-weight:700;text-align:center;cursor:pointer;">📷 Open Capture for SO004521</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="caption-box">
+    <div class="caption-screen-id">iPad Screen B — Queue</div>
+    <div class="caption-title">Worklist with Order Preview</div>
+    <div class="caption-text">The iPad queue uses a two-column layout. The left column shows the list of pending orders. The right column shows the selected order's stage summary with a large Open Capture button. This allows the intern to review what is needed before opening the camera, without any extra navigation steps.</div>
+    <div class="caption-columns">
+      <div>
+        <div class="caption-col-title">Left Panel — Order List</div>
+        <div class="caption-btn-row"><span class="btn-tag">Order Row Tap</span> Loads the order summary in the right panel without navigating away from the queue.</div>
+        <div class="caption-btn-row"><span class="btn-tag gray">Color Dot</span> Red: all stages pending. Orange: partially complete. Blue: only After pending.</div>
+      </div>
+      <div>
+        <div class="caption-col-title">Right Panel — Order Preview</div>
+        <div class="caption-btn-row"><span class="btn-tag">Open Capture Button</span> Navigates to the full Capture screen for the selected order, landing on the first incomplete stage.</div>
+        <div class="caption-btn-row"><span class="btn-tag gray">Scan QR Code</span> In the header. Opens the camera in QR scan mode to load an order not in the queue.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════ -->
+<!-- IPAD SCREEN 3: CAPTURE — WIP ACTIVE -->
+<!-- ═══════════════════════════════════════ -->
+<div class="ipad-section">
+  <div class="screen-label">iPad Screen I — Capture, WIP Active</div>
+  <div class="ipad">
+    <div class="ipad-home-bar"><div class="ipad-pill"></div></div>
+    <div class="ipad-screen">
+      <!-- HEADER -->
+      <div class="ipad-header">
+        <div class="ipad-header-left">
+          <svg width="90" height="28" viewBox="0 0 200 65" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="44" height="44" rx="8" fill="none" stroke="white" stroke-width="3.5"/>
+            <polyline points="6,24 13,24 17,10 22,38 27,18 31,28 35,14 40,24 48,24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <text x="58" y="34" font-family="Arial Black,Arial" font-weight="900" font-size="30" fill="white">BMES</text>
+            <text x="58" y="50" font-family="Arial" font-style="italic" font-size="11.5" fill="rgba(255,255,255,0.7)" letter-spacing="1.2">BEYOND THE EXPECTED®</text>
+          </svg>
+          <div class="so-info-inline">
+            <div class="so-num">SO004521 — Riverside Electronics Service</div>
+            <div style="margin-top:3px;"><span class="so-status">● In Processing</span></div>
+          </div>
+        </div>
+        <div class="ipad-header-right">
+          <div style="background:rgba(255,255,255,0.15);color:white;border-radius:8px;padding:5px 12px;font-size:11px;cursor:pointer;">📷 Scan New Order</div>
+          <div class="user-chip">👤 John Tariq</div>
+        </div>
+      </div>
+      <!-- STAGE TABS -->
+      <div class="ipad-stage-tabs">
+        <div class="istab done"><span style="color:#2e7d32;font-size:13px;">✓</span><div><div class="istab-label">Before</div><div class="istab-count">3 photos · Complete</div></div></div>
+        <div class="istab active"><span style="color:#ff9800;font-size:13px;">●</span><div><div class="istab-label">WIP</div><div class="istab-count">0 photos · Active</div></div></div>
+        <div class="istab"><div><div class="istab-label">After</div><div class="istab-count">0 photos</div></div></div>
+        <div style="margin-left:auto;display:flex;align-items:center;padding:0 10px;">
+          <div style="background:#e8f0fe;color:#1565c0;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:600;cursor:pointer;">‹ Back to Queue</div>
+        </div>
+      </div>
+      <!-- BODY: LEFT INFO + RIGHT CAMERA -->
+      <div class="ipad-body" style="flex:1;">
+        <!-- LEFT PANEL -->
+        <div class="ipad-left">
+          <div class="panel-section-title">Current Stage</div>
+          <div class="stage-detail-card">
+            <div class="sdc-title"><span style="width:9px;height:9px;border-radius:50%;background:#ff9800;display:inline-block;flex-shrink:0;"></span> Work In Progress (WIP)</div>
+            <div class="sdc-desc">Capture the device during active repair. Show internal components, disassembly, or visible corrosion if present.</div>
+            <div class="sdc-status status-pending">● 0 photos captured</div>
+          </div>
+
+          <div class="panel-section-title" style="margin-top:6px;">Before — 3 Photos</div>
+          <div class="thumb-grid">
+            <div class="ipad-thumb"><div class="ipad-thumb-bg" style="background:linear-gradient(135deg,#42a5f5,#1565c0);">💻</div><div class="ipad-thumb-del">×</div><div class="ipad-thumb-count">Photo 1</div></div>
+            <div class="ipad-thumb"><div class="ipad-thumb-bg" style="background:linear-gradient(135deg,#66bb6a,#2e7d32);">💻</div><div class="ipad-thumb-del">×</div><div class="ipad-thumb-count">Photo 2</div></div>
+            <div class="ipad-thumb"><div class="ipad-thumb-bg" style="background:linear-gradient(135deg,#ab47bc,#6a1b9a);">💻</div><div class="ipad-thumb-del">×</div><div class="ipad-thumb-count">Photo 3</div></div>
+          </div>
+
+          <div class="panel-section-title" style="margin-top:6px;">Capture Log</div>
+          <div class="audit-card">
+            <div class="audit-row"><span class="audit-label">Before by</span><span class="audit-value">John Tariq</span></div>
+            <div class="audit-row"><span class="audit-label">Before on</span><span class="audit-value">05 May, 9:14 AM</span></div>
+            <div class="audit-row"><span class="audit-label">WIP photos</span><span class="audit-value" style="color:#b45309;">Pending</span></div>
+            <div class="audit-row"><span class="audit-label">After photos</span><span class="audit-value" style="color:#b45309;">Pending</span></div>
+            <div class="audit-row"><span class="audit-label">Storage</span><span class="audit-value" style="color:#2e7d32;">✓ Acumatica</span></div>
+          </div>
+
+          <div style="margin-top:10px;">
+            <div style="background:white;border:1.5px solid #1565c0;color:#1565c0;border-radius:8px;padding:9px;font-size:11.5px;font-weight:600;text-align:center;cursor:pointer;margin-bottom:7px;">🖼 Upload WIP from Gallery</div>
+          </div>
+        </div>
+
+        <!-- RIGHT PANEL: CAMERA -->
+        <div class="ipad-right">
+          <div class="ipad-camera-area">
+            <div class="ipad-grid-lines"></div>
+            <div class="ipad-stage-overlay">
+              <div class="ipad-stage-badge">● WIP STAGE — SO004521</div>
+            </div>
+            <div class="ipad-device-silhouette">💻</div>
+          </div>
+          <div class="ipad-camera-controls">
+            <div class="ipad-btn-secondary">🔄 Flip Camera</div>
+            <div class="ipad-shutter"><div class="ipad-shutter-inner"></div></div>
+            <div class="ipad-btn-secondary">✕ Cancel</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="caption-box">
+    <div class="caption-screen-id">iPad Screen I — Capture, WIP Active</div>
+    <div class="caption-title">Two-Column Capture Layout — Optimized for iPad</div>
+    <div class="caption-text">The iPad capture screen places all contextual information in the left panel and dedicates the right panel entirely to the camera. The technician can see the SO details, the Before thumbnails for reference, and the full capture log without leaving the camera view. The large shutter button is easy to tap while the other hand positions the device being photographed.</div>
+    <div class="caption-columns">
+      <div>
+        <div class="caption-col-title">Left Panel Controls</div>
+        <div class="caption-btn-row"><span class="btn-tag">Before Thumbnails</span> Tap any thumbnail to open Photo Detail view (Screen H). Left panel updates; camera stays visible on the right.</div>
+        <div class="caption-btn-row"><span class="btn-tag">Upload from Gallery</span> Opens the iPad photo library. Selected photos are pushed to Acumatica under the WIP stage.</div>
+        <div class="caption-btn-row"><span class="btn-tag gray">Stage Tabs</span> Switch between Before, WIP, After. Camera stays open; stage badge updates to reflect the new active stage.</div>
+        <div class="caption-btn-row"><span class="btn-tag gray">Back to Queue</span> Returns to the Queue screen. Camera is closed. Any captured photos are already saved in Acumatica.</div>
+      </div>
+      <div>
+        <div class="caption-col-title">Right Panel Controls</div>
+        <div class="caption-btn-row"><span class="btn-tag">Shutter Button</span> Takes the photo immediately. Photo is pushed to Acumatica in the background. Left panel thumbnail count updates. Camera stays open for the next shot.</div>
+        <div class="caption-btn-row"><span class="btn-tag gray">Flip Camera</span> Switches between rear and front camera. Rear camera is default for device photography.</div>
+        <div class="caption-btn-row"><span class="btn-tag gray">Scan New Order</span> In the header. Opens the iPad camera in QR scan mode to load a different order.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
